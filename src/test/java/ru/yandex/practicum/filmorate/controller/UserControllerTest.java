@@ -16,7 +16,6 @@ public class UserControllerTest {
 
     private User user;
     private UserController userController;
-
     @BeforeEach
     public void beforeEach() {
         userController = new UserController();
