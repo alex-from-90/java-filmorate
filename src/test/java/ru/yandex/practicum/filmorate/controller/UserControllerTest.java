@@ -29,6 +29,7 @@ public class UserControllerTest {
     }
 
     // Добавление пользователя
+
     @Test
     public void testAddUserAllCorrect() {
         User user1 = userController.create(user);
@@ -37,6 +38,7 @@ public class UserControllerTest {
     }
 
     // проверка пустого email
+
     @Test
     public void testEmailIsEmpty() {
         user.setEmail("");
@@ -45,6 +47,7 @@ public class UserControllerTest {
     }
 
     // проверка неправильной почты
+
     @Test
     public void testIncorrectEmail() {
         user.setEmail("yandex.ru");
@@ -52,6 +55,7 @@ public class UserControllerTest {
     }
 
     // проверка пустого логина
+
     @Test
     public void testIncorrectLogin() {
         user.setLogin("");
@@ -59,6 +63,7 @@ public class UserControllerTest {
     }
 
     // проверка на пробелы в имени
+
     @Test
     public void testIncorrectNameWithSpaces() {
         user.setLogin("Леонид Куравлёв");
@@ -66,6 +71,7 @@ public class UserControllerTest {
     }
 
     // проверка на пустое имя
+
     @Test
     public void testEmptyName() {
         user.setName("");
@@ -74,6 +80,7 @@ public class UserControllerTest {
     }
 
     // Неправильная дата рождения
+
     @Test
     public void testFutureBirthday() {
         user.setBirthday(LocalDate.parse(String.valueOf(LocalDate.now().plusDays(1))));
