@@ -134,7 +134,7 @@
 			<message key="ws.notPreceded" value="GenericWhitespace ''{0}'' is not preceded with whitespace."/>
 			<message key="ws.followed" value="GenericWhitespace ''{0}'' is followed by whitespace."/>
 			<message key="ws.preceded" value="GenericWhitespace ''{0}'' is preceded with whitespace."/>
-			<message key="ws.illegalFollow" value="GenericWhitespace ''{0}'' test followed by whitespace."/>
+			<message key="ws.illegalFollow" value="GenericWhitespace ''{0}'' should followed by whitespace."/>
 		</module>
 		<!-- No trailing whitespace -->
 		<module name="Regexp">
