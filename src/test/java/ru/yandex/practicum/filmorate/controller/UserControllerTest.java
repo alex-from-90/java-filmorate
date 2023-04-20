@@ -27,7 +27,6 @@ public class UserControllerTest {
                 .birthday(LocalDate.parse(String.valueOf(LocalDate.of(1980, 9, 13))))
                 .id(1).build();
     }
-
     // Добавление пользователя
     @Test
     public void testAddUserAllCorrect() {
