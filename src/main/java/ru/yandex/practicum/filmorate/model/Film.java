@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-
 import lombok.Builder;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.validator.AfterDateFilm;
@@ -26,7 +25,7 @@ public class Film {
 
     @NotNull(message = "У фильма должна быть указана продолжительность")
     @Positive(message = "Продолжительность фильма не может быть отрицательной")
-    private  Integer duration;
+    private Integer duration;
 
     @NotNull(message = "У фильма должна быть указана дата релиза")
     @AfterDateFilm(value = "1895-12-28", message = "Дата выхода должна быть после даты")

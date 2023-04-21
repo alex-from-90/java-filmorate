@@ -16,7 +16,6 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
 public class FilmControllerTest {
     private Film film;
     private static Validator validator;
@@ -68,6 +67,7 @@ public class FilmControllerTest {
         violations = validator.validate(film);
         assertEquals(1, violations.size(), "Ошибки валидации");
     }
+
     @Test
     public void testEmptyDescription() {
         film.setDescription("");
