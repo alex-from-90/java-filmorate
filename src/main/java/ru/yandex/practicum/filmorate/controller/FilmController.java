@@ -1,73 +1,37 @@
 package ru.yandex.practicum.filmorate.controller;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.servise.FilmService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
+@RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    private final Map<Integer, Film> films;
-    private Integer currentId;
+    private final FilmService filmService;
 
-    public FilmController() {
-        currentId = 0;
-        films = new HashMap<>();
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
     }
 
-    @GetMapping("/films")
+    @GetMapping
     public List<Film> getFilms() {
-        return new ArrayList<>(films.values());
+        return filmService.getFilms();
     }
 
-    @ResponseBody
-    @PostMapping(value = "/films")
+    @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        log.info("Получен POST-запрос к эндпоинту: '/films' на добавление фильма с ID={}", currentId);
-        if (!isValidFilm(film)) {
-            throw new ValidationException("Фильм не прошел валидацию");
-        }
-        film.setId(++currentId);
-        films.put(film.getId(), film);
-        return film;
+        log.info("Получен POST-запрос к эндпоинту: '/films' на добавление фильма с ID={}", film.getId());
+        return filmService.create(film);
     }
 
-    @ResponseBody
-    @PutMapping(value = "/films")
+    @PutMapping
     public Film update(@Valid @RequestBody Film film) {
         log.info("Получен PUT-запрос к эндпоинту: '/films' на обновление фильма с ID={}", film.getId());
-        if (isValidFilm(film)) {
-            if (films.containsKey(film.getId())) {
-                films.put(film.getId(), film);
-                return film;
-            } else {
-                throw new ValidationException("Фильм с ID=" + film.getId() + " не найден");
-            }
-        } else {
-            throw new ValidationException("Фильм не прошел валидацию");
-        }
-    }
-
-    private boolean isValidFilm(Film film) {
-        if (film.getName().isEmpty()) {
-            return false;
-        }
-        if ((film.getDescription().length()) > 200 || (film.getDescription().isEmpty())) {
-            return false;
-        }
-         if (LocalDate.parse(film.getReleaseDate(), DateTimeFormatter.ISO_DATE).isBefore(LocalDate.of(1895, 12, 28))) {
-            return false;
-        }
-        return film.getDuration() > 0;
+        return filmService.update(film);
     }
 }

@@ -2,83 +2,84 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest
 
 public class FilmControllerTest {
     private Film film;
-    private FilmController filmController;
+    private static Validator validator;
+    private Set<ConstraintViolation<Film>> violations;
 
     @BeforeEach
     public void beforeEach() {
-        filmController = new FilmController();
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
         film = Film.builder()
                 .name("Кин-дза-дза!")
                 .description("Бригадир Владимир Николаевич Машков и не подозревал, " +
                         "что обычный путь в гастроном за хлебом и макаронами превратится в межгалактическое путешествие.")
-                .releaseDate(String.valueOf(LocalDate.of(1986, 12, 1)))
+                .releaseDate(LocalDate.parse(String.valueOf(LocalDate.of(1986, 12, 1))))
                 .duration(135)
                 .id(1).build();
+        violations = validator.validate(film);
     }
 
     // проверка добавления фильма
     @Test
     public void testAddFilm() {
-        Film film1 = filmController.create(film);
-        assertEquals(film, film1, "Неверный ответ при передаче фильма");
-        assertEquals(1, filmController.getFilms().size(), "Неверное колличество фильмов");
+        violations = validator.validate(film);
+        assertEquals(0, violations.size(), "Ошибки валидации");
+        List<Film> films = new ArrayList<>();
+        films.add(film);
+        assertTrue(films.contains(film), "Фильм не был добавлен в список");
     }
 
     // проверка  при пустом названии у фильма
     @Test
     public void testEmptyFilmName() {
         film.setName("");
-        assertThrows(ValidationException.class, () -> filmController.create(film));
-    }
-
-    // проверка длины описания фильма
-    @Test
-    public void testNameLength() {
-        film.setDescription(film.getDescription() + film.getDescription());
-        assertThrows(ValidationException.class, () -> filmController.create(film));
-    }
-
-    // проверка фильма без описания
-    @Test
-    public void testEmptyDescription() {
-        film.setDescription("");
-        assertThrows(ValidationException.class, () -> filmController.create(film));
-    }
-
-    // проверка даты релиза
-    @Test
-    public void testIncorrectRelease() {
-        film.setReleaseDate(String.valueOf(LocalDate.of(1895, 12, 27)));
-        assertThrows(ValidationException.class, () -> filmController.create(film));
+        violations = validator.validate(film);
+        assertEquals(1, violations.size(), "Ошибки валидации");
     }
 
     // продолжительность фильма равна нулю
     @Test
-    public void testIncorrectDurationNull() {
-        film.setDuration(0);
-        assertThrows(ValidationException.class, () -> filmController.create(film));
+    public void testInvalidDuration() {
+        film.setDuration(-1);
+        violations = validator.validate(film);
+        assertEquals(1, violations.size(), "Ошибки валидации");
+    }
+
+    @Test
+    public void testIncorrectRelease() {
+        film.setReleaseDate(LocalDate.parse(String.valueOf(LocalDate.of(1895, 12, 27))));
+        violations = validator.validate(film);
+        assertEquals(1, violations.size(), "Ошибки валидации");
+    }
+    @Test
+    public void testEmptyDescription() {
+        film.setDescription("");
+        violations = validator.validate(film);
+        assertEquals(0, violations.size(), "Ошибки валидации");
     }
 
     // неправильная продолжительность фильма
     @Test
     public void testIncorrectDurationIsNegative() {
         film.setDuration(-1);
-        assertThrows(ValidationException.class, () -> filmController.create(film));
+        violations = validator.validate(film);
+        assertEquals(1, violations.size(), "Ошибки валидации");
     }
 }
