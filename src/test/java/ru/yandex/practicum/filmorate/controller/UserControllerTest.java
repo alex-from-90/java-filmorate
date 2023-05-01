@@ -30,7 +30,7 @@ public class UserControllerTest {
                 .login("n911")
                 .email("alex@site-n.ru")
                 .birthday(LocalDate.parse(String.valueOf(LocalDate.of(1980, 9, 13))))
-                .id(1).build();
+                .id(1L).build();
         violations = validator.validate(user);
     }
 

@@ -31,7 +31,7 @@ public class FilmControllerTest {
                         "что обычный путь в гастроном за хлебом и макаронами превратится в межгалактическое путешествие.")
                 .releaseDate(LocalDate.parse(String.valueOf(LocalDate.of(1986, 12, 1))))
                 .duration(135)
-                .id(1).build();
+                .id(1L).build();
         violations = validator.validate(film);
     }
 
