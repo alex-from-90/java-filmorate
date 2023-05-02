@@ -3,63 +3,57 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.controller.endpoints.ApiEndpointsUser;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.validation.Valid;
 import java.util.List;
 
-@Slf4j
 @RestController
+@Slf4j
+@RequestMapping("/users")
 @AllArgsConstructor
 public class UserController {
-
-
-    private final UserStorage userStorage;
     private final UserService userService;
 
-    @ResponseBody
-    @PostMapping(ApiEndpointsUser.USERS)
+    @PostMapping
     public User create(@Valid @RequestBody User user) {
-        log.info("Получен POST-запрос к эндпоинту: '{}' на добавление пользователя", ApiEndpointsUser.USERS);
-        return userStorage.createUser(user);
+        log.info("Получен POST-запрос к эндпоинту: '/users' на добавление пользователя");
+        return userService.createUser(user);
     }
 
-    @ResponseBody
-    @PutMapping(ApiEndpointsUser.USERS)
+    @PutMapping
     public User update(@Valid @RequestBody User user) {
-        log.info("Получен PUT-запрос к эндпоинту: '{}' на обновление пользователя с ID={}", ApiEndpointsUser.USERS, user.getId());
-        return userStorage.updateUser(user);
+        log.info("Получен PUT-запрос к эндпоинту: '/users' на обновление пользователя с ID={}", user.getId());
+        return userService.updateUser(user);
     }
 
-    @GetMapping(ApiEndpointsUser.USERS)
+    @GetMapping
     public List<User> getAllUsers() {
-        return userStorage.getAllUsers();
+        return userService.getAllUsers();
     }
 
-    @GetMapping(ApiEndpointsUser.USERS_ID)
+    @GetMapping("/{id}")
     public User getUserById(@PathVariable Long id) {
-        return userStorage.getUserById(id);
+        return userService.getUserById(id);
     }
 
-    @GetMapping(ApiEndpointsUser.USERS_ID_FRIENDS)
+    @GetMapping("/{id}/friends")
     public List<User> getFriends(@PathVariable Long id) {
         return userService.getFriends(id);
     }
 
-    @GetMapping(ApiEndpointsUser.USERS_ID_FRIENDS_COMMON)
+    @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
         return userService.getCommonFriends(id, otherId);
     }
 
-    @PutMapping(ApiEndpointsUser.USERS_ID_FRIENDS_FRIENDID)
+    @PutMapping("/{id}/friends/{friendId}")
     public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
         userService.addFriend(id, friendId);
     }
 
-    @DeleteMapping(ApiEndpointsUser.USERS_ID_FRIENDS_FRIENDID)
+    @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
         userService.deleteFriend(id, friendId);
     }

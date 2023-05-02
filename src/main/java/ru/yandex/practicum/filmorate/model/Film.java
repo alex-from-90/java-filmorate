@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Builder;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.validator.AfterDateFilm;
 
@@ -13,7 +12,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@Builder
 public class Film {
     private Long id;
 
@@ -33,7 +31,7 @@ public class Film {
     @AfterDateFilm(value = "1895-12-28", message = "Дата выхода должна быть после даты")
     private LocalDate releaseDate;
 
-    private Set<Long> likes;
+    Set<Long> likes = new HashSet<>();
 
 
     public Film(Long id, String name, String description, Integer duration, LocalDate releaseDate, Set<Long> likes) {

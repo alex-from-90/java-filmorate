@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
-    private final FilmStorage filmStorage;
+    public final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
     @Autowired
@@ -38,26 +38,40 @@ public class FilmService {
 
     public void deleteLike(Long filmId, Long userId) {
         Film film = filmStorage.getFilmById(filmId);
-        if (film != null) {
-            if (film.getLikes().remove(userId)) {
-                return;
-            } else {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Лайк от пользователя c ID=" + userId + " не найден!");
-            }
+        if (film.getLikes().remove(userId)) {
+            return;
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм c ID=" + filmId + " не найден!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Лайк от пользователя c ID=" + userId + " не найден!");
         }
     }
 
     public List<Film> getPopular(Integer count) {
-        if (count == null) {
-            count = 10;
-        } else if (count < 1) {
+        if (count < 1) {
             throw new ValidationException("Количество фильмов для вывода не должно быть меньше 1");
         }
         return filmStorage.getFilms().stream()
                 .sorted((o1, o2) -> o2.getLikes().size() - o1.getLikes().size())
                 .limit(count)
                 .collect(Collectors.toList());
+    }
+
+    public List<Film> getFilms() {
+        return filmStorage.getFilms();
+    }
+
+    public Film create(Film film) {
+        return filmStorage.create(film);
+    }
+
+    public Film update(Film film) {
+        return filmStorage.update(film);
+    }
+
+    public Film getFilmById(Long id) {
+        return filmStorage.getFilmById(id);
+    }
+
+    public Film delete(Long id) {
+        return filmStorage.delete(id);
     }
 }
