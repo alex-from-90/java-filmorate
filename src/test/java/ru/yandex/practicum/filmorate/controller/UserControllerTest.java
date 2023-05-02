@@ -25,12 +25,7 @@ public class UserControllerTest {
     public void beforeEach() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
-        user = User.builder()
-                .name("Алексей")
-                .login("n911")
-                .email("alex@site-n.ru")
-                .birthday(LocalDate.parse(String.valueOf(LocalDate.of(1980, 9, 13))))
-                .id(1L).build();
+        user = new User(1L, "alex@site-n.ru", "n911", "Алексей", LocalDate.of(1980, 9, 13), null);
         violations = validator.validate(user);
     }
 

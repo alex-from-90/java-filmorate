@@ -39,4 +39,5 @@ public class User {
             this.friends = friends;
         }
     }
+
 }
