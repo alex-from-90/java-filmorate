@@ -31,17 +31,15 @@ public class Film {
     @AfterDateFilm(value = "1895-12-28", message = "Дата выхода должна быть после даты")
     private LocalDate releaseDate;
 
-    Set<Long> likes = new HashSet<>();
+    private Set<Long> likes;
 
 
-    public Film(Long id, String name, String description, Integer duration, LocalDate releaseDate, Set<Long> likes) {
+    public Film(Long id, String name, String description, Integer duration, LocalDate releaseDate) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.duration = duration;
         this.releaseDate = releaseDate;
-        if (likes == null) {
-            this.likes = new HashSet<>();
-        }
+        this.likes = new HashSet<>();
     }
 }

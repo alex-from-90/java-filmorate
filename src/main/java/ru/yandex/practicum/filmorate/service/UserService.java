@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
-    public final UserStorage userStorage;
+    private final UserStorage userStorage;
 
     @Autowired
     public UserService(UserStorage userStorage) {
@@ -78,5 +78,3 @@ public class UserService {
         return userStorage.getUserById(id);
     }
 }
-
-

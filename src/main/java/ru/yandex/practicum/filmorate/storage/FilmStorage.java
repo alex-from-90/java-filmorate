@@ -18,4 +18,3 @@ public interface FilmStorage {
 
     Film delete(Long filmId);
 }
-

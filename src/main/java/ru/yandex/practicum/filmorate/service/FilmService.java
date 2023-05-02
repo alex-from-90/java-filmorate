@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
-    public final FilmStorage filmStorage;
+    private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
     @Autowired
@@ -25,22 +25,17 @@ public class FilmService {
 
     public void addLike(Long filmId, Long userId) {
         Film film = filmStorage.getFilmById(filmId);
-        if (film != null) {
-            if (userStorage.getUserById(userId) != null) {
-                film.getLikes().add(userId);
-            } else {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь c ID=" + userId + " не найден!");
-            }
+        if (userStorage.getUserById(userId) != null) {
+            film.getLikes().add(userId);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм c ID=" + filmId + " не найден!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь c ID=" + userId + " не найден!");
         }
     }
 
+
     public void deleteLike(Long filmId, Long userId) {
         Film film = filmStorage.getFilmById(filmId);
-        if (film.getLikes().remove(userId)) {
-            return;
-        } else {
+        if (!film.getLikes().remove(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Лайк от пользователя c ID=" + userId + " не найден!");
         }
     }

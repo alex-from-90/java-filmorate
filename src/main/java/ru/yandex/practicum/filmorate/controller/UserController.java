@@ -58,9 +58,3 @@ public class UserController {
         userService.deleteFriend(id, friendId);
     }
 }
-
-
-
-
-
-

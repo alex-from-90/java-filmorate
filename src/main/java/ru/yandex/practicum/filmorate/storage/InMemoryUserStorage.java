@@ -65,5 +65,4 @@ public class InMemoryUserStorage implements UserStorage {
         }
         return userMap.remove(userId);
     }
-
 }
