@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Builder;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.validator.AfterDateFilm;
 
@@ -9,11 +8,12 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
-@Builder
 public class Film {
-    private int id;
+    private Long id;
 
     @NotNull(message = "У фильма должно быть имя")
     @NotBlank(message = "Имя не может быть пустым")
@@ -30,4 +30,16 @@ public class Film {
     @NotNull(message = "У фильма должна быть указана дата релиза")
     @AfterDateFilm(value = "1895-12-28", message = "Дата выхода должна быть после даты")
     private LocalDate releaseDate;
+
+    private Set<Long> likes;
+
+
+    public Film(Long id, String name, String description, Integer duration, LocalDate releaseDate) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.duration = duration;
+        this.releaseDate = releaseDate;
+        this.likes = new HashSet<>();
+    }
 }

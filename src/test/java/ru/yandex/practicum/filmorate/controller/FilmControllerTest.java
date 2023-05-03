@@ -9,9 +9,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,13 +23,10 @@ public class FilmControllerTest {
     public void beforeEach() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
-        film = Film.builder()
-                .name("Кин-дза-дза!")
-                .description("Бригадир Владимир Николаевич Машков и не подозревал, " +
-                        "что обычный путь в гастроном за хлебом и макаронами превратится в межгалактическое путешествие.")
-                .releaseDate(LocalDate.parse(String.valueOf(LocalDate.of(1986, 12, 1))))
-                .duration(135)
-                .id(1).build();
+
+        film = new Film(1L, "Кин-дза-дза!", "Бригадир Владимир Николаевич Машков и не подозревал, " +
+                "что обычный путь в гастроном за хлебом и макаронами превратится в межгалактическое путешествие.",
+                135, LocalDate.of(1986, 12, 1));
         violations = validator.validate(film);
     }
 
