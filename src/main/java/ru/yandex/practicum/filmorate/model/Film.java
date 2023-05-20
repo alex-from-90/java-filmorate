@@ -17,7 +17,7 @@ public class Film {
 
     @NotNull(message = "У фильма должно быть имя")
     @NotBlank(message = "Имя не может быть пустым")
-    private String name;
+    private  String name;
 
     @NotNull(message = "У фильма должно быть описание")
     @Size(max = 200, message = "Описание не должно больше 200 символов")
