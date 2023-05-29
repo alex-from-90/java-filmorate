@@ -26,79 +26,51 @@ Build web, including RESTful, applications using Spring MVC. Uses Apache Tomcat 
 <details><summary>Структура базы данных</summary>
 <a href = "diagram.png" target ="_blank"><img src="diagram.png" alt="Logo" /></a>
 
-**Таблица "film":**
+**Таблица ratings_mpa:**
 
-- "film_id" - уникальный идентификатор фильма
-- "title" - название фильма
-- "description" - описание фильма
-- "duration" - длительность фильма в минутах
-- "release_date" - дата выпуска фильма
+- id: уникальный идентификатор рейтинга (автоинкрементируемое целое число).
+- name: название рейтинга (строка длиной до 255 символов).
+- description: описание рейтинга (строка длиной до 255 символов).
 
-**Таблица "film_genre":**
+**Таблица films:**
 
-- "film_id" - идентификатор фильма
-- "genre_id" - идентификатор жанра
-- "mpa_rating_id" - идентификатор рейтинга MPAA
+- id: уникальный идентификатор фильма (автоинкрементируемое целое число).
+- name: название фильма (строка длиной до 255 символов).
+- description: описание фильма (строка длиной до 200 символов).
+- release_date: дата выпуска фильма.
+- duration: продолжительность фильма (целое число).
+- rating_id: идентификатор рейтинга фильма (ссылка на таблицу ratings_mpa).
 
-**Таблица "film_like":**
+**Таблица genres:**
 
-- "film_id" - идентификатор фильма
-- "user_id" - идентификатор пользователя
+- id: уникальный идентификатор жанра (автоинкрементируемое целое число).
+- name: название жанра (строка длиной до 255 символов).
 
- **Таблица "friends":**
+**Таблица film_genres:**
 
-- "user_id" - идентификатор пользователя
-- "friend_id" - идентификатор друга
-- "status" - статус отношений между пользователями (логическое значение true/false)
+- film_id: идентификатор фильма (ссылка на таблицу films).
+- genre_id: идентификатор жанра (ссылка на таблицу genres).
+- Составной первичный ключ (film_id, genre_id).
 
+**Таблица users:**
 
-**Таблица "genres":**
+- id: уникальный идентификатор пользователя (автоинкрементируемое целое число).
+- email: адрес электронной почты пользователя (строка длиной до 255 символов).
+- login: логин пользователя (строка длиной до 255 символов).
+- name: имя пользователя (строка длиной до 255 символов).
+- birthday: дата рождения пользователя.
 
-- "genre_id" - уникальный идентификатор жанра
-- "genre_name" - название жанра 
- 
-**Таблица "mpa_rating":**
+**Таблица film_likes:**
 
-- "mpa_rating_id" - уникальный идентификатор рейтинга MPAA
-- "mpa_name" - название рейтинга MPAA
+- film_id: идентификатор фильма (ссылка на таблицу films).
+- user_id: идентификатор пользователя (ссылка на таблицу users).
+- Составной первичный ключ (film_id, user_id).
 
-**Таблица "user":**
+**Таблица friends:**
 
-- "user_id" - уникальный идентификатор пользователя
-- "email" - адрес электронной почты пользователя
-- "login" - логин пользователя
-- "name" - имя пользователя
-- "birthday" - дата рождения пользователя
-
-**Внешние ключи:**
-
-- "film_genre_film_id_foreign" - внешний ключ для связи с таблицей "film" по полю "film_id"
-- "film_genre_genre_id_foreign" - внешний ключ для связи с таблицей "genres" по полю "genre_id"
-- "film_mpa_rating_id_foreign" - внешний ключ для связи с таблицей "mpa_rating" по полю "mpa_rating_id"
-- "film_like_film_id_foreign" - внешний ключ для связи с таблицей "film" по полю "film_id"
-- "film_like_user_id_foreign" - внешний ключ для связи с таблицей "user" по полю "user_id"
-- "friends_to_user_id_foreign" - внешний ключ для связи с таблицей "user" по полю "user_id"
-
-**Ограничения и ключи:**
-- "film_pkey" - первичный ключ для таблицы "film" по полю "film_id"
-- "film_genre_pkey" - первичный ключ для таблицы "film_genre" по полям "film_id", "genre_id" и "mpa_rating_id"
-- "film_like_pkey" - первичный ключ для таблицы "film_like" по полям "film_id" и "user_id"
-- "friends_pkey" - первичный ключ для таблицы "friends" по полям "user_id" и "friend_id"
-- "friends_to_user_id_unique" - уникальное значение поля "user_id" в таблице "friends"
-- "genres_pkey" - первичный ключ для таблицы "genres" по полю "genre_id"
-- "genres_name_unique" - уникальное значение поля "genre_name" в таблице "genres"
-- "mpa_rating_pkey" - первичный ключ для таблицы "mpa_rating" по полю "mpa_rating_id"
-- "mpa_rating_name_unique" - уникальное значение поля "mpa_name" в таблице "mpa_rating"
-- "user_pkey" - первичный ключ для таблицы "user" по полю "user_id"
-- "user_email_unique" - уникальное значение поля "email" в таблице "user"
-- "user_login_unique" - уникальное значение поля "login" в таблице "user"
-- "film_genre_film_id_foreign" - внешний ключ для связи с таблицей "film" по полю "film_id" в таблице "film_genre"
-- "film_genre_genre_id_foreign" - внешний ключ для связи с таблицей "genres" по полю "genre_id" в таблице "film_genre"
-- "film_mpa_rating_id_foreign" - внешний ключ для связи с таблицей "mpa_rating" по полю "mpa_rating_id" в таблице "film_genre"
-- "film_like_film_id_foreign" - внешний ключ для связи с таблицей "film" по полю "film_id" в таблице "film_like"
-- "film_like_user_id_foreign" - внешний ключ для связи с таблицей "user" по полю "user_id" в таблице "film_like"
-- "friends_to_user_id_foreign" - внешний ключ для связи с таблицей "user" по полю "user_id" в таблице "friends"
-
+- user_id: идентификатор пользователя (ссылка на таблицу users).
+- friend_id: идентификатор друга пользователя (ссылка на таблицу users).
+- status: статус дружбы (логическое значение).
 
 </details>
 
