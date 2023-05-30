@@ -32,7 +32,6 @@ public class FilmDbStorage implements FilmStorage {
 
     private final LikeStorage likeStorage;
 
-
     public List<Film> getFilms() {
         String sql = "SELECT * FROM films";
         FilmMapper filmMapper = new FilmMapper(mpaService, genreService, likeStorage);

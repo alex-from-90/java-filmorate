@@ -20,6 +20,7 @@ import java.util.List;
 public class GenreStorage {
     private final JdbcTemplate jdbcTemplate;
     GenreMapper genreMapper = new GenreMapper();
+
     public List<Genre> getGenres() {
         String sql = "SELECT * FROM genres";
         return jdbcTemplate.query(sql, genreMapper);

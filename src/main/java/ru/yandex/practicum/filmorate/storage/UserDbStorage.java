@@ -26,6 +26,7 @@ public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
     UserMapper userMapper = new UserMapper();
+
     @Override
     public List<User> getAllUsers() {
         String sql = "SELECT * FROM users";
