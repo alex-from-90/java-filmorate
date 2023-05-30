@@ -1,4 +1,4 @@
-package db;
+package ru.yandex.practicum.filmorate.db;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +25,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@SpringBootTest(classes = ru.yandex.practicum.filmorate.FilmorateApplication.class)
+@SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -92,21 +92,26 @@ class FilmorateApplicationTests {
 
     @Test
     public void testCreateUserAndGetUserById() {
-        firstUser = userStorage.createUser(firstUser);
-        User user = userStorage.getUserById(firstUser.getId());
+        User createdUser = userStorage.createUser(firstUser);
+        User retrievedUser = userStorage.getUserById(createdUser.getId());
 
-        assertThat(user)
-                .extracting(User::getId, User::getName)
-                .containsExactly(firstUser.getId(), "User1");
+        assertThat(retrievedUser)
+                .extracting(User::getId, User::getName, User::getLogin, User::getEmail, User::getBirthday)
+                .containsExactly(
+                        createdUser.getId(),
+                        createdUser.getName(),
+                        createdUser.getLogin(),
+                        createdUser.getEmail(),
+                        createdUser.getBirthday()
+                );
     }
-
 
     @Test
     public void testUpdateUser() {
-        firstUser = userStorage.createUser(firstUser);
+        User createdUser = userStorage.createUser(firstUser);
 
         User updateUser = new User();
-        updateUser.setId(firstUser.getId());
+        updateUser.setId(createdUser.getId());
         updateUser.setName("UpdateUser1");
         updateUser.setLogin("First");
         updateUser.setEmail("one@yandex.ru");
@@ -120,42 +125,42 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void deleteUser() {
-        firstUser = userStorage.createUser(firstUser);
-        userStorage.delete(firstUser.getId());
+    public void testDeleteUser() {
+        User createdUser = userStorage.createUser(firstUser);
+        userStorage.delete(createdUser.getId());
         List<User> listUsers = userStorage.getAllUsers();
         assertThat(listUsers).hasSize(0);
     }
 
     @Test
     public void testCreateFilmAndGetFilmById() {
-        firstFilm = filmStorage.create(firstFilm);
+        Film createdFilm = filmStorage.create(firstFilm);
 
-        Film film = filmStorage.getFilmById(firstFilm.getId());
+        Film retrievedFilm = filmStorage.getFilmById(createdFilm.getId());
 
-        assertThat(film)
+        assertThat(retrievedFilm)
                 .extracting(Film::getId, Film::getName)
-                .containsExactly(firstFilm.getId(), "Фильм 1");
+                .containsExactly(createdFilm.getId(), "Фильм 1");
     }
 
     @Test
     public void testGetFilms() {
-        firstFilm = filmStorage.create(firstFilm);
-        secondFilm = filmStorage.create(secondFilm);
-        thirdFilm = filmStorage.create(thirdFilm);
+        Film createdFirstFilm = filmStorage.create(firstFilm);
+        Film createdSecondFilm = filmStorage.create(secondFilm);
+        Film createdThirdFilm = filmStorage.create(thirdFilm);
 
         List<Film> listFilms = filmStorage.getFilms();
 
         assertThat(listFilms)
-                .containsExactlyInAnyOrder(firstFilm, secondFilm, thirdFilm);
+                .containsExactlyInAnyOrder(createdFirstFilm, createdSecondFilm, createdThirdFilm);
     }
 
     @Test
     public void testUpdateFilm() {
-        firstFilm = filmStorage.create(firstFilm);
+        Film createdFilm = filmStorage.create(firstFilm);
 
         Film updateFilm = new Film();
-        updateFilm.setId(firstFilm.getId());
+        updateFilm.setId(createdFilm.getId());
         updateFilm.setName("UpdateName");
         updateFilm.setDescription("UpdateDescription");
         updateFilm.setReleaseDate(LocalDate.of(1975, 11, 19));
@@ -171,10 +176,10 @@ class FilmorateApplicationTests {
 
     @Test
     public void testDeleteFilm() {
-        firstFilm = filmStorage.create(firstFilm);
-        secondFilm = filmStorage.create(secondFilm);
+        Film createdFirstFilm = filmStorage.create(firstFilm);
+        Film createdSecondFilm = filmStorage.create(secondFilm);
 
-        filmStorage.delete(firstFilm.getId());
+        filmStorage.delete(createdFirstFilm.getId());
 
         List<Film> listFilms = filmStorage.getFilms();
         assertThat(listFilms).hasSize(1);
@@ -184,50 +189,50 @@ class FilmorateApplicationTests {
 
     @Test
     public void testAddLike() {
-        firstUser = userStorage.createUser(firstUser);
-        firstFilm = filmStorage.create(firstFilm);
+        User createdUser = userStorage.createUser(firstUser);
+        Film createdFilm = filmStorage.create(firstFilm);
 
-        filmService.addLike(firstFilm.getId(), firstUser.getId());
+        filmService.addLike(createdFilm.getId(), createdUser.getId());
 
-        firstFilm = filmStorage.getFilmById(firstFilm.getId());
-        assertThat(firstFilm.getLikes())
+        Film updatedFilm = filmStorage.getFilmById(createdFilm.getId());
+        assertThat(updatedFilm.getLikes())
                 .hasSize(1)
-                .contains(firstUser.getId());
+                .contains(createdUser.getId());
     }
 
     @Test
     public void testDeleteLike() {
-        firstUser = userStorage.createUser(firstUser);
-        secondUser = userStorage.createUser(secondUser);
-        firstFilm = filmStorage.create(firstFilm);
+        User createdFirstUser = userStorage.createUser(firstUser);
+        User createdSecondUser = userStorage.createUser(secondUser);
+        Film createdFilm = filmStorage.create(firstFilm);
 
-        filmService.addLike(firstFilm.getId(), firstUser.getId());
-        filmService.addLike(firstFilm.getId(), secondUser.getId());
-        filmService.deleteLike(firstFilm.getId(), firstUser.getId());
+        filmService.addLike(createdFilm.getId(), createdFirstUser.getId());
+        filmService.addLike(createdFilm.getId(), createdSecondUser.getId());
+        filmService.deleteLike(createdFilm.getId(), createdFirstUser.getId());
 
-        firstFilm = filmStorage.getFilmById(firstFilm.getId());
-        assertThat(firstFilm.getLikes())
+        Film updatedFilm = filmStorage.getFilmById(createdFilm.getId());
+        assertThat(updatedFilm.getLikes())
                 .hasSize(1)
-                .contains(secondUser.getId());
+                .contains(createdSecondUser.getId());
     }
 
     @Test
     public void testGetPopularFilms() {
-        firstUser = userStorage.createUser(firstUser);
-        secondUser = userStorage.createUser(secondUser);
-        thirdUser = userStorage.createUser(thirdUser);
+        User createdFirstUser = userStorage.createUser(firstUser);
+        User createdSecondUser = userStorage.createUser(secondUser);
+        User createdThirdUser = userStorage.createUser(thirdUser);
 
-        firstFilm = filmStorage.create(firstFilm);
-        filmService.addLike(firstFilm.getId(), firstUser.getId());
+        Film createdFirstFilm = filmStorage.create(firstFilm);
+        filmService.addLike(createdFirstFilm.getId(), createdFirstUser.getId());
 
-        secondFilm = filmStorage.create(secondFilm);
-        filmService.addLike(secondFilm.getId(), firstUser.getId());
-        filmService.addLike(secondFilm.getId(), secondUser.getId());
-        filmService.addLike(secondFilm.getId(), thirdUser.getId());
+        Film createdSecondFilm = filmStorage.create(secondFilm);
+        filmService.addLike(createdSecondFilm.getId(), createdFirstUser.getId());
+        filmService.addLike(createdSecondFilm.getId(), createdSecondUser.getId());
+        filmService.addLike(createdSecondFilm.getId(), createdThirdUser.getId());
 
-        thirdFilm = filmStorage.create(thirdFilm);
-        filmService.addLike(thirdFilm.getId(), firstUser.getId());
-        filmService.addLike(thirdFilm.getId(), secondUser.getId());
+        Film createdThirdFilm = filmStorage.create(thirdFilm);
+        filmService.addLike(createdThirdFilm.getId(), createdFirstUser.getId());
+        filmService.addLike(createdThirdFilm.getId(), createdSecondUser.getId());
 
         List<Film> listFilms = filmService.getPopular(5);
 
@@ -239,68 +244,69 @@ class FilmorateApplicationTests {
 
     @Test
     public void testAddFriend() {
-        firstUser = userStorage.createUser(firstUser);
-        secondUser = userStorage.createUser(secondUser);
+        User createdFirstUser = userStorage.createUser(firstUser);
+        User createdSecondUser = userStorage.createUser(secondUser);
 
-        userService.addFriend(firstUser.getId(), secondUser.getId());
+        userService.addFriend(createdFirstUser.getId(), createdSecondUser.getId());
 
-        List<User> friends = userService.getFriends(firstUser.getId());
+        List<User> friends = userService.getFriends(createdFirstUser.getId());
 
         assertThat(friends)
                 .hasSize(1)
-                .contains(secondUser);
+                .anyMatch(user -> user.getId().equals(createdSecondUser.getId()));
     }
 
     @Test
     public void testDeleteFriend() {
-        firstUser = userStorage.createUser(firstUser);
-        secondUser = userStorage.createUser(secondUser);
-        thirdUser = userStorage.createUser(thirdUser);
+        User createdFirstUser = userStorage.createUser(firstUser);
+        User createdSecondUser = userStorage.createUser(secondUser);
+        User createdThirdUser = userStorage.createUser(thirdUser);
 
-        userService.addFriend(firstUser.getId(), secondUser.getId());
-        userService.addFriend(firstUser.getId(), thirdUser.getId());
+        userService.addFriend(createdFirstUser.getId(), createdSecondUser.getId());
+        userService.addFriend(createdFirstUser.getId(), createdThirdUser.getId());
 
-        userService.deleteFriend(firstUser.getId(), secondUser.getId());
+        userService.deleteFriend(createdFirstUser.getId(), createdSecondUser.getId());
 
-        List<User> friends = userService.getFriends(firstUser.getId());
+        List<User> friends = userService.getFriends(createdFirstUser.getId());
 
         assertThat(friends)
                 .hasSize(1)
-                .contains(thirdUser);
+                .anyMatch(user -> user.getId().equals(createdThirdUser.getId()));
     }
 
 
     @Test
     public void testGetFriends() {
-        firstUser = userStorage.createUser(firstUser);
-        secondUser = userStorage.createUser(secondUser);
-        thirdUser = userStorage.createUser(thirdUser);
+        User createdFirstUser = userStorage.createUser(firstUser);
+        User createdSecondUser = userStorage.createUser(secondUser);
+        User createdThirdUser = userStorage.createUser(thirdUser);
 
-        userService.addFriend(firstUser.getId(), secondUser.getId());
-        userService.addFriend(firstUser.getId(), thirdUser.getId());
+        userService.addFriend(createdFirstUser.getId(), createdSecondUser.getId());
+        userService.addFriend(createdFirstUser.getId(), createdThirdUser.getId());
 
-        List<User> friends = userService.getFriends(firstUser.getId());
+        List<User> friends = userService.getFriends(createdFirstUser.getId());
 
         assertThat(friends)
                 .hasSize(2)
-                .contains(secondUser, thirdUser);
+                .anyMatch(user -> user.getId().equals(createdSecondUser.getId()))
+                .anyMatch(user -> user.getId().equals(createdThirdUser.getId()));
     }
 
     @Test
     public void testGetCommonFriends() {
-        firstUser = userStorage.createUser(firstUser);
-        secondUser = userStorage.createUser(secondUser);
-        thirdUser = userStorage.createUser(thirdUser);
+        User createdFirstUser = userStorage.createUser(firstUser);
+        User createdSecondUser = userStorage.createUser(secondUser);
+        User createdThirdUser = userStorage.createUser(thirdUser);
 
-        userService.addFriend(firstUser.getId(), secondUser.getId());
-        userService.addFriend(firstUser.getId(), thirdUser.getId());
-        userService.addFriend(secondUser.getId(), firstUser.getId());
-        userService.addFriend(secondUser.getId(), thirdUser.getId());
+        userService.addFriend(createdFirstUser.getId(), createdSecondUser.getId());
+        userService.addFriend(createdFirstUser.getId(), createdThirdUser.getId());
+        userService.addFriend(createdSecondUser.getId(), createdFirstUser.getId());
+        userService.addFriend(createdSecondUser.getId(), createdThirdUser.getId());
 
-        List<User> commonFriends = userService.getCommonFriends(firstUser.getId(), secondUser.getId());
+        List<User> commonFriends = userService.getCommonFriends(createdFirstUser.getId(), createdSecondUser.getId());
 
         assertThat(commonFriends)
                 .hasSize(1)
-                .contains(thirdUser);
+                .satisfies(userList -> assertThat(userList.get(0).getId()).isEqualTo(createdThirdUser.getId()));
     }
 }

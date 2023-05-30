@@ -39,7 +39,7 @@ public class LikeStorage {
             String deleteSql = "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";
             jdbcTemplate.update(deleteSql, filmId, userId);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Like not found for Film ID: " + filmId + " and User ID: " + userId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Лайк для фильма с ID: " + filmId + " и User ID: " + userId);
         }
     }
 

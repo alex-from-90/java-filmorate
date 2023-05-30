@@ -25,11 +25,10 @@ import java.util.List;
 public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final UserMapper userMapper;
-
+    UserMapper userMapper = new UserMapper();
     @Override
     public List<User> getAllUsers() {
-        String sql = "SELECT id, email, login, name, birthday FROM users";
+        String sql = "SELECT * FROM users";
         return jdbcTemplate.query(sql, userMapper);
     }
 
@@ -71,7 +70,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User getUserById(Long userId) {
-        String sql = "SELECT id, email, login, name, birthday FROM users WHERE id = ?";
+        String sql = "SELECT * FROM users WHERE id = ?";
         User user;
         try {
             user = jdbcTemplate.queryForObject(sql, userMapper, userId);

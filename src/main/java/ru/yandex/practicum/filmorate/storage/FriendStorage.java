@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.mapper.FriendRowMapper;
+import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
@@ -21,7 +21,6 @@ import java.util.List;
 public class FriendStorage {
     private final JdbcTemplate jdbcTemplate;
     private final UserStorage userStorage;
-    private final FriendRowMapper friendMapper;
 
     public void addFriend(Long userId, Long friendId) {
         User user = userStorage.getUserById(userId);
@@ -31,7 +30,7 @@ public class FriendStorage {
             jdbcTemplate.update(sql, userId, friendId, true);
         } else {
             // Один или оба пользователей не найдены
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "One or both users not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Один или оба пользователя не найдены");
         }
     }
 
@@ -45,7 +44,8 @@ public class FriendStorage {
         if (user != null) {
             String sql = "SELECT u.id, u.email, u.login, u.name, u.birthday FROM users u " +
                     "JOIN friends f ON f.friend_id = u.id WHERE f.user_id = ?";
-            return jdbcTemplate.query(sql, ps -> ps.setLong(1, userId), friendMapper);
+            UserMapper userMapper = new UserMapper();
+            return jdbcTemplate.query(sql, ps -> ps.setLong(1, userId), userMapper);
         } else {
             return Collections.emptyList();
         }
@@ -57,9 +57,10 @@ public class FriendStorage {
                 "JOIN friends f2 ON f1.friend_id = f2.friend_id " +
                 "JOIN users u ON f1.friend_id = u.id " +
                 "WHERE f1.user_id = ? AND f2.user_id = ?";
+        UserMapper userMapper = new UserMapper();
         return jdbcTemplate.query(sql, ps -> {
             ps.setLong(1, firstUserId);
             ps.setLong(2, secondUserId);
-        }, friendMapper);
+        }, userMapper);
     }
 }

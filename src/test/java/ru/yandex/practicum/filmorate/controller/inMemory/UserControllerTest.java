@@ -1,5 +1,5 @@
 package ru.yandex.practicum.filmorate.controller.inMemory;
-/*
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.User;
@@ -96,5 +96,3 @@ public class UserControllerTest {
         assertEquals(1, violations.size(), "Ошибки валидации");
     }
 }
-
- */

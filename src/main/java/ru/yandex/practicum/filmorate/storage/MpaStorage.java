@@ -18,7 +18,7 @@ public class MpaStorage {
     private final JdbcTemplate jdbcTemplate;
 
     public List<Mpa> getAllMpa() {
-        String sql = "SELECT id, name, description FROM ratings_mpa";
+        String sql = "SELECT * FROM ratings_mpa";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new Mpa(
                 rs.getInt("id"),
                 rs.getString("name"))
@@ -28,7 +28,7 @@ public class MpaStorage {
     public Mpa getMpaById(Integer mpaId) {
 
         Mpa mpa;
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("SELECT id, name, description FROM ratings_mpa WHERE id = ?", mpaId);
+        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("SELECT * FROM ratings_mpa WHERE id = ?", mpaId);
         if (mpaRows.first()) {
             mpa = new Mpa(
                     mpaRows.getInt("id"),

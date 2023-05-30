@@ -8,6 +8,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.mapper.GenreMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -18,13 +19,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GenreStorage {
     private final JdbcTemplate jdbcTemplate;
-
+    GenreMapper genreMapper = new GenreMapper();
     public List<Genre> getGenres() {
-        String sql = "SELECT id, name FROM genres";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new Genre(
-                rs.getInt("id"),
-                rs.getString("name"))
-        );
+        String sql = "SELECT * FROM genres";
+        return jdbcTemplate.query(sql, genreMapper);
     }
 
     public Genre getGenreById(Integer genreId) {
@@ -32,7 +30,7 @@ public class GenreStorage {
             throw new ValidationException("Передан пустой аргумент!");
         }
         Genre genre;
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("SELECT id, name FROM genres WHERE id = ?", genreId);
+        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("SELECT * FROM genres WHERE id = ?", genreId);
         if (genreRows.first()) {
             genre = new Genre(
                     genreRows.getInt("id"),
@@ -59,7 +57,7 @@ public class GenreStorage {
     }
 
     public List<Genre> getFilmGenres(Long filmId) {
-        String sql = "SELECT genre_id, name FROM film_genres" +
+        String sql = "SELECT * FROM film_genres" +
                 " INNER JOIN genres ON genre_id = id WHERE film_id = ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new Genre(
                 rs.getInt("genre_id"), rs.getString("name")), filmId

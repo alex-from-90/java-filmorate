@@ -34,7 +34,7 @@ public class FilmDbStorage implements FilmStorage {
 
 
     public List<Film> getFilms() {
-        String sql = "SELECT id, name, description, release_date, duration, rating_id FROM films";
+        String sql = "SELECT * FROM films";
         FilmMapper filmMapper = new FilmMapper(mpaService, genreService, likeStorage);
         return jdbcTemplate.query(sql, filmMapper);
     }
@@ -84,7 +84,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(Long filmId) {
-        String sqlQuery = "SELECT id, name, description, release_date, duration, rating_id FROM films WHERE id = ?";
+        String sqlQuery = "SELECT * FROM films WHERE id = ?";
         FilmMapper filmMapper = new FilmMapper(mpaService, genreService, likeStorage);
 
         try {

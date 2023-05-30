@@ -1,6 +1,4 @@
-
 package ru.yandex.practicum.filmorate.controller.inMemory;
- /*
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,4 +83,3 @@ public class FilmControllerTest {
         assertEquals(1, violations.size(), "Ошибки валидации");
     }
 }
-*/
