@@ -177,7 +177,6 @@ class FilmorateApplicationTests {
     @Test
     public void testDeleteFilm() {
         Film createdFirstFilm = filmStorage.create(firstFilm);
-        Film createdSecondFilm = filmStorage.create(secondFilm);
 
         filmStorage.delete(createdFirstFilm.getId());
 
