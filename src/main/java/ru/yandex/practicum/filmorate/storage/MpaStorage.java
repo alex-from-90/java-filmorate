@@ -18,7 +18,7 @@ public class MpaStorage {
     private final JdbcTemplate jdbcTemplate;
 
     public List<Mpa> getAllMpa() {
-        String sql = "SELECT * FROM ratings_mpa";
+        String sql = "SELECT * FROM ratings_mpa ORDER BY id";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new Mpa(
                 rs.getInt("id"),
                 rs.getString("name"))

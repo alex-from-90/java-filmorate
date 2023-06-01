@@ -15,7 +15,7 @@ public class UserMapper implements RowMapper<User> {
         return user;
     }
 
-    static User userSet(ResultSet rs) throws SQLException {
+    private static User userSet(ResultSet rs) throws SQLException {
         User user = new User();
         user.setId(rs.getLong("id"));
         user.setEmail(rs.getString("email"));

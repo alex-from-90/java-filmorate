@@ -44,9 +44,10 @@ public class LikeStorage {
     }
 
     public List<Film> getPopular(long count) {
-        String getPopularQuery = "SELECT id, name, description, release_date, duration, rating_id " +
+        String getPopularQuery = "SELECT films.*, rating_id " +
                 "FROM films LEFT JOIN film_likes ON films.id = film_likes.film_id " +
                 "GROUP BY films.id ORDER BY COUNT(film_likes.user_id) DESC LIMIT ?";
+
 
         return jdbcTemplate.query(getPopularQuery, (rs, rowNum) -> {
             Long filmId = rs.getLong("id");

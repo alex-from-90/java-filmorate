@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.GenreMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -22,14 +21,11 @@ public class GenreStorage {
     GenreMapper genreMapper = new GenreMapper();
 
     public List<Genre> getGenres() {
-        String sql = "SELECT * FROM genres";
+        String sql = "SELECT * FROM genres ORDER BY id";
         return jdbcTemplate.query(sql, genreMapper);
     }
 
     public Genre getGenreById(Integer genreId) {
-        if (genreId == null) {
-            throw new ValidationException("Передан пустой аргумент!");
-        }
         Genre genre;
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet("SELECT * FROM genres WHERE id = ?", genreId);
         if (genreRows.first()) {
