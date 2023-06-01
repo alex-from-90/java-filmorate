@@ -11,13 +11,11 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.GenreService;
-import ru.yandex.practicum.filmorate.service.MpaService;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.model.FilmColumn;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Primary // Наставник разрешил использовать вместо @Qualifier
 @Component
@@ -25,25 +23,23 @@ import java.util.Map;
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
-    private final MpaService mpaService;
-
-    private final GenreService genreService;
-
+    private final MpaStorage mpaStorage;
+    private final GenreStorage genreStorage;
     private final LikeStorage likeStorage;
 
 
     public List<Film> getFilms() {
         String sql = "SELECT * FROM films";
-        FilmMapper filmMapper = new FilmMapper(mpaService, genreService, likeStorage);
-        return jdbcTemplate.query(sql, filmMapper);
+        List<FilmColumn> filmColumns = jdbcTemplate.query(sql, new FilmMapper());
+
+        return filmColumns.stream().map(this::fromColumnsToDto).collect(Collectors.toList());
     }
 
     @Override
     public Film create(Film film) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("films")
-                .usingGeneratedKeyColumns("id");
+            .withTableName("films")
+            .usingGeneratedKeyColumns("id");
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", film.getName());
@@ -53,8 +49,8 @@ public class FilmDbStorage implements FilmStorage {
         parameters.put("rating_id", film.getMpa().getId());
         long generatedId = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
         film.setId(generatedId);
-        film.setMpa(mpaService.getMpaById(film.getMpa().getId()));
-        genreService.putGenres(film);
+        film.setMpa(mpaStorage.getMpaById(film.getMpa().getId()));
+        genreStorage.add(film);
 
         return film;
     }
@@ -62,19 +58,21 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film update(Film film) {
         String sqlQuery = "UPDATE films SET " +
-                "name = ?, description = ?, release_date = ?, duration = ?, " +
-                "rating_id = ? WHERE id = ?";
-        int updateCount = jdbcTemplate.update(sqlQuery,
-                film.getName(),
-                film.getDescription(),
-                film.getReleaseDate(),
-                film.getDuration(),
-                film.getMpa().getId(),
-                film.getId());
+            "name = ?, description = ?, release_date = ?, duration = ?, " +
+            "rating_id = ? WHERE id = ?";
+        int updateCount = jdbcTemplate.update(
+            sqlQuery,
+            film.getName(),
+            film.getDescription(),
+            film.getReleaseDate(),
+            film.getDuration(),
+            film.getMpa().getId(),
+            film.getId()
+        );
 
         if (updateCount != 0) {
-            film.setMpa(mpaService.getMpaById(film.getMpa().getId()));
-            genreService.updateFilmGenres(film);
+            film.setMpa(mpaStorage.getMpaById(film.getMpa().getId()));
+            genreStorage.updateGenres(film);
 
             return film;
         } else {
@@ -85,10 +83,9 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film getFilmById(Long filmId) {
         String sqlQuery = "SELECT * FROM films WHERE id = ?";
-        FilmMapper filmMapper = new FilmMapper(mpaService, genreService, likeStorage);
-
         try {
-            return jdbcTemplate.queryForObject(sqlQuery, filmMapper, filmId);
+            FilmColumn filmColumn = jdbcTemplate.queryForObject(sqlQuery, new FilmMapper(), filmId);
+            return fromColumnsToDto(Objects.requireNonNull(filmColumn));
         } catch (EmptyResultDataAccessException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
         }
@@ -101,6 +98,19 @@ public class FilmDbStorage implements FilmStorage {
         if (jdbcTemplate.update(sqlQuery, filmId) == 0) {
             throw new NotFoundException("Фильм с ID=" + filmId + " не найден!");
         }
+        return film;
+    }
+
+    private Film fromColumnsToDto(FilmColumn filmColumn) {
+        Film film = new Film();
+        film.setId(filmColumn.getId());
+        film.setName(filmColumn.getName());
+        film.setDescription(filmColumn.getDescription());
+        film.setDuration(filmColumn.getDuration());
+        film.setReleaseDate(filmColumn.getReleaseDate());
+        film.setMpa(mpaStorage.getMpaById(filmColumn.getMpaId()));
+        film.setGenres(new HashSet<>(genreStorage.getFilmGenres(film.getId())));
+        film.setLikes(new HashSet<>(likeStorage.getLikes(filmColumn.getId())));
         return film;
     }
 }
