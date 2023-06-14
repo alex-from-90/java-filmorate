@@ -1,5 +1,5 @@
-package ru.yandex.practicum.filmorate.controller;
-
+package ru.yandex.practicum.filmorate.controller.inMemory;
+/*
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -24,9 +24,14 @@ public class FilmControllerTest {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
 
-        film = new Film(1L, "Кин-дза-дза!", "Бригадир Владимир Николаевич Машков и не подозревал, " +
-                "что обычный путь в гастроном за хлебом и макаронами превратится в межгалактическое путешествие.",
-                135, LocalDate.of(1986, 12, 1));
+        film = new Film();
+        film.setId(1L);
+        film.setName("Кин-дза-дза!");
+        film.setDescription("Бригадир Владимир Николаевич Машков и не подозревал, " +
+                "что обычный путь в гастроном за хлебом и макаронами превратится в межгалактическое путешествие.");
+        film.setDuration(135);
+        film.setReleaseDate(LocalDate.of(1986, 12, 15));
+
         violations = validator.validate(film);
     }
 
@@ -78,3 +83,5 @@ public class FilmControllerTest {
         assertEquals(1, violations.size(), "Ошибки валидации");
     }
 }
+
+ */

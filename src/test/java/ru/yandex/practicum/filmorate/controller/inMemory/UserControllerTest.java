@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.controller;
+package ru.yandex.practicum.filmorate.controller.inMemory;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,14 @@ public class UserControllerTest {
     public void beforeEach() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
-        user = new User(1L, "alex@site-n.ru", "n911", "Алексей", LocalDate.of(1980, 9, 13));
+
+        user = new User();
+        user.setId(1L);
+        user.setEmail("alex@site-n.ru");
+        user.setLogin("n911");
+        user.setName("Алексей");
+        user.setBirthday(LocalDate.of(1980, 9, 13));
+
         violations = validator.validate(user);
     }
 
