@@ -99,6 +99,41 @@ public class FilmDbStorage implements FilmStorage {
         return film;
     }
 
+    @Override
+    public List<Film> getRecommendations(Long id) {
+        String sql = "SELECT f.* FROM films f "
+                + "JOIN film_likes fl ON f.id = fl.film_id WHERE user_id = ?";
+        List<FilmColumn> mainUserFilms = jdbcTemplate.query(sql, new FilmMapper(), id);
+        long reliedUserId = 0;
+        long confidence = 0;
+        long count = 0;
+        for (FilmColumn mainUserFilm : mainUserFilms) {
+            List<Long> likes = likeStorage.getLikes(mainUserFilm.getId());
+            likes.remove(id);
+            if (likes.isEmpty()) {
+                continue;
+            }
+            for (Long userId: likes) {
+                for (FilmColumn userFilm : jdbcTemplate.query(sql, new FilmMapper(), userId)) {
+                    if (mainUserFilms.contains(userFilm)) {
+                        count++;
+                    }
+                }
+                if (count > confidence) {
+                    confidence = count;
+                    reliedUserId = userId;
+                }
+            }
+        }
+        List<Film> recommendation = new ArrayList<>();
+        for (FilmColumn newFilm: jdbcTemplate.query(sql, new FilmMapper(), reliedUserId)) {
+            if (!mainUserFilms.contains(newFilm)) {
+                recommendation.add(fromColumnsToDto(Objects.requireNonNull(newFilm)));
+            }
+        }
+        return recommendation;
+    }
+
     private Film fromColumnsToDto(FilmColumn filmColumn) {
         Film film = new Film();
         film.setId(filmColumn.getId());
