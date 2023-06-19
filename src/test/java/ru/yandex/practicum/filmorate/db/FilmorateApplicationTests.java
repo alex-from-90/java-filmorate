@@ -6,11 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.ReviewService;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
@@ -27,12 +28,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class FilmorateApplicationTests {
     private final UserDbStorage userStorage;
     private final FilmDbStorage filmStorage;
-    private final FilmService filmService;
     private final UserService userService;
+    private final ReviewService reviewService;
     private User firstUser;
     private User secondUser;
     private User thirdUser;
@@ -186,7 +187,7 @@ class FilmorateApplicationTests {
         User createdUser = userStorage.createUser(firstUser);
         Film createdFilm = filmStorage.create(firstFilm);
 
-        filmService.addLike(createdFilm.getId(), createdUser.getId());
+        reviewService.addLike(createdFilm.getId(), createdUser.getId());
 
         Film updatedFilm = filmStorage.getFilmById(createdFilm.getId());
         assertThat(updatedFilm.getLikes())
@@ -200,9 +201,9 @@ class FilmorateApplicationTests {
         User createdSecondUser = userStorage.createUser(secondUser);
         Film createdFilm = filmStorage.create(firstFilm);
 
-        filmService.addLike(createdFilm.getId(), createdFirstUser.getId());
-        filmService.addLike(createdFilm.getId(), createdSecondUser.getId());
-        filmService.deleteLike(createdFilm.getId(), createdFirstUser.getId());
+        reviewService.addLike(createdFilm.getId(), createdFirstUser.getId());
+        reviewService.addLike(createdFilm.getId(), createdSecondUser.getId());
+        reviewService.deleteLike(createdFilm.getId(), createdFirstUser.getId());
 
         Film updatedFilm = filmStorage.getFilmById(createdFilm.getId());
         assertThat(updatedFilm.getLikes())
@@ -217,18 +218,18 @@ class FilmorateApplicationTests {
         User createdThirdUser = userStorage.createUser(thirdUser);
 
         Film createdFirstFilm = filmStorage.create(firstFilm);
-        filmService.addLike(createdFirstFilm.getId(), createdFirstUser.getId());
+        reviewService.addLike(createdFirstFilm.getId(), createdFirstUser.getId());
 
         Film createdSecondFilm = filmStorage.create(secondFilm);
-        filmService.addLike(createdSecondFilm.getId(), createdFirstUser.getId());
-        filmService.addLike(createdSecondFilm.getId(), createdSecondUser.getId());
-        filmService.addLike(createdSecondFilm.getId(), createdThirdUser.getId());
+        reviewService.addLike(createdSecondFilm.getId(), createdFirstUser.getId());
+        reviewService.addLike(createdSecondFilm.getId(), createdSecondUser.getId());
+        reviewService.addLike(createdSecondFilm.getId(), createdThirdUser.getId());
 
         Film createdThirdFilm = filmStorage.create(thirdFilm);
-        filmService.addLike(createdThirdFilm.getId(), createdFirstUser.getId());
-        filmService.addLike(createdThirdFilm.getId(), createdSecondUser.getId());
+        reviewService.addLike(createdThirdFilm.getId(), createdFirstUser.getId());
+        reviewService.addLike(createdThirdFilm.getId(), createdSecondUser.getId());
 
-        List<Film> listFilms = filmService.getPopular(5);
+        List<Film> listFilms = reviewService.getPopular(5);
 
         assertThat(listFilms)
                 .hasSize(3)
