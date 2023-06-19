@@ -62,4 +62,6 @@ public class FilmController {
         log.info("Получен DELETE-запрос к эндпоинту: '/films' на удаление фильма с ID={}", id);
         return filmService.delete(id);
     }
+
+    //TODO Добавить методы удаления фильма по id
 }
