@@ -58,5 +58,4 @@ public class UserService {
         return userStorage.getUserById(id);
     }
 
-    public
-}
+    public }
