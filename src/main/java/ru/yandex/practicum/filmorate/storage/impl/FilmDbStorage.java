@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Primary // Наставник разрешил использовать вместо @Qualifier
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
 
@@ -96,12 +98,14 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void delete(Long filmId) {
+    public void deleteFilmById(Long filmId) {
         //@formatter:off
         String sqlQuery = "DELETE FROM films WHERE id = ? ";
         //@formatter:on
         if (jdbcTemplate.update(sqlQuery, filmId) == 0) {
             throw new NotFoundException("Фильм с ID=" + filmId + " не найден!");
+        } else {
+            log.info("Фильм с ID={} удален", filmId);
         }
     }
 

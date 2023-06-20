@@ -166,7 +166,7 @@ class FilmorateApplicationTests {
     @Test
     public void testDeleteFilm() {
         Film createdFirstFilm = filmStorage.create(firstFilm);
-        filmStorage.delete(createdFirstFilm.getId());
+        filmStorage.deleteFilmById(createdFirstFilm.getId());
         List<Film> listFilms = filmStorage.getFilms();
         assertThat(listFilms).hasSize(0);
     }

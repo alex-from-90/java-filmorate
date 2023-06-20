@@ -43,6 +43,6 @@ public class FilmService {
     }
 
     public void delete(Long id) {
-        filmStorage.delete(id);
+        filmStorage.deleteFilmById(id);
     }
 }
