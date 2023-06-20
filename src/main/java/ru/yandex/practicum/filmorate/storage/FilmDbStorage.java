@@ -90,13 +90,11 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film delete(Long filmId) {
-        Film film = getFilmById(filmId);
+    public void delete(Long filmId) {
         String sqlQuery = "DELETE FROM films WHERE id = ? ";
         if (jdbcTemplate.update(sqlQuery, filmId) == 0) {
             throw new NotFoundException("Фильм с ID=" + filmId + " не найден!");
         }
-        return film;
     }
 
     private Film fromColumnsToDto(FilmColumn filmColumn) {
