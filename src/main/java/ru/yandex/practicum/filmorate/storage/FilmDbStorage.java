@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.mapper.LikeMapper;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.model.FilmColumn;
 
@@ -101,10 +103,28 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getRecommendations(Long id) {
-        String sql = "SELECT f.* FROM films f "
-                + "JOIN film_likes fl ON f.id = fl.film_id WHERE user_id = ?";
-        List<FilmColumn> mainUserFilms = jdbcTemplate.query(sql, new FilmMapper(), id);
-        long reliedUserId = 0;
+        String c = "select t1.user_id \n" +
+                "from film_likes t1 join film_likes t2 ON t1.film_id = t2.film_id\n" +
+                "and t1.user_id != t2.user_id\n" +
+                "WHERE t1.user_id = ?\n" +
+                "group by t1.user_id, t2.user_id\n" +
+                "order by count(*) desc limit 1";
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+        /*long reliedUserId = 0;
         long confidence = 0;
         long count = 0;
         for (FilmColumn mainUserFilm : mainUserFilms) {
@@ -131,7 +151,8 @@ public class FilmDbStorage implements FilmStorage {
                 recommendation.add(fromColumnsToDto(Objects.requireNonNull(newFilm)));
             }
         }
-        return recommendation;
+        return recommendation;*/
+
     }
 
     private Film fromColumnsToDto(FilmColumn filmColumn) {
