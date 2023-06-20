@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 @Data
 @RequiredArgsConstructor
 public class Feed {
-    private Long eventId;
+    private Long feedId;
     private Long timestamp;
     private Long userId;
     private String eventType;
