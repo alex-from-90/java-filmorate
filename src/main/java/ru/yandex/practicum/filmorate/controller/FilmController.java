@@ -61,9 +61,9 @@ public class FilmController {
     }
 
     @DeleteMapping("/{id}")
-    public Film delete(@PathVariable Long id) {
+    public void delete(@PathVariable Long id) {
         log.info("Получен DELETE-запрос к эндпоинту: '/films' на удаление фильма с ID={}", id);
-        return filmService.delete(id);
+        filmService.delete(id);
     }
 
     //TODO Добавить методы удаления фильма по id

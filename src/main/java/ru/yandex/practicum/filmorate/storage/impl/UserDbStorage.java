@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -84,12 +84,13 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User delete(Long userId) {
+    public void deleteUserById(Long userId) {
         User user = getUserById(userId);
         String sqlQuery = "DELETE FROM users WHERE id = ? ";
         if (jdbcTemplate.update(sqlQuery, userId) == 0) {
             throw new NotFoundException("Пользователь с ID=" + userId + " не найден!");
+        } else {
+            log.info("Пользователь с ID={} успешно удален", user.getId());
         }
-        return user;
     }
 }

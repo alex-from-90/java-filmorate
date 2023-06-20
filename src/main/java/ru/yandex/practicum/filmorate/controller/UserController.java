@@ -29,6 +29,13 @@ public class UserController {
         return userService.updateUser(user);
     }
 
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        log.info("Получен DELETE-запрос к эндпоинту: '/users' на удаление пользователя с ID={}",
+                id);
+        userService.deleteUserById(id);
+    }
+
     @GetMapping
     public List<User> getAllUsers() {
         log.info("Получен GET-запрос к эндпоинту: '/users' на вывод списка всех пользователей");
