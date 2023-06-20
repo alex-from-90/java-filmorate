@@ -44,4 +44,9 @@ public class FilmController {
         log.info("Получен DELETE-запрос к эндпоинту: '/films' на удаление фильма с ID={}", id);
         return filmService.delete(id);
     }
+    @GetMapping("/popular")
+    public List<Film> getPopular(@RequestParam(name = "count", defaultValue = "10") Integer count) {
+        log.info("Получен GET-запрос к эндпоинту: '/films' на получение популярных фильмов");
+        return filmService.getPopular(count);
+    }
 }

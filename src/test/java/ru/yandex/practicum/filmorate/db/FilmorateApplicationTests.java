@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
@@ -33,6 +34,7 @@ class FilmorateApplicationTests {
     private final UserDbStorage userStorage;
     private final FilmDbStorage filmStorage;
     private final UserService userService;
+    private final FilmService filmService;
     private final ReviewService reviewService;
     private User firstUser;
     private User secondUser;
@@ -229,7 +231,7 @@ class FilmorateApplicationTests {
         reviewService.addLike(createdThirdFilm.getId(), createdFirstUser.getId());
         reviewService.addLike(createdThirdFilm.getId(), createdSecondUser.getId());
 
-        List<Film> listFilms = reviewService.getPopular(5);
+        List<Film> listFilms = filmService.getPopular(5);
 
         assertThat(listFilms)
                 .hasSize(3)
