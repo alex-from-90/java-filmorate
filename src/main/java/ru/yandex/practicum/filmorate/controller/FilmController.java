@@ -49,4 +49,15 @@ public class FilmController {
         log.info("Получен GET-запрос к эндпоинту: '/films' на получение популярных фильмов");
         return filmService.getPopular(count);
     }
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Получен PUT-запрос к эндпоинту: '/films' на добавление лайка фильму с ID={}", id);
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Получен DELETE-запрос к эндпоинту: '/films' на удаление лайка у фильма с ID={}", id);
+        filmService.deleteLike(id, userId);
+    }
 }

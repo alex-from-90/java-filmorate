@@ -2,51 +2,58 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.storage.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.ReviewDbStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
 import java.util.Collection;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 
 public class ReviewService {
-    private final LikeStorage likeStorage;
-    private final UserStorage userStorage;
-    private final FilmStorage filmStorage;
+
     private final ReviewDbStorage reviewStorage;
 
     public void addLike(Long filmId, Long userId) {
-        likeStorage.addLike(filmId, userId);
+        reviewStorage.addLike(filmId, userId);
     }
 
     public void deleteLike(Long filmId, Long userId) {
-        likeStorage.deleteLike(filmId, userId);
+        reviewStorage.deleteLike(filmId, userId);
     }
 
-
+    //Добавить отзыв
     public Review add(Review review) {
         return reviewStorage.add(review);
     }
 
-    public Review update(Review review) {
-        return null;
+    //Обновить отзыв
+    public Review updateReview(Review review) {
+        return reviewStorage.update(review);  // Сделать обновление события
     }
 
-    public Review delete(Long id) {
-        return null;
+    //Удалить отзыв
+    public void deleteById(Long reviewId) {
+        reviewStorage.deleteById(reviewId);
     }
 
+    //Получить отзыв по ID
     public Review getReviewById(final Long id) {
         return reviewStorage.getById(id).orElse(null);
     }
 
+    //Получить все отзывы
     public Collection<Review> getAllReviews(Long filmId, Long count) {
         return reviewStorage.getAll(filmId, count);
+    }
+
+    //Поставить дизлайк
+    public void addUserDislike(Long id, Long userId) {
+        reviewStorage.addDislike(id, userId);
+    }
+
+    //Удалить дизлайк
+    public void deleteUserDislike(Long id, Long userId) {
+        reviewStorage.deleteDislike(id, userId);
     }
 }
