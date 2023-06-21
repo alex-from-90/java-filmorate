@@ -52,7 +52,6 @@ public class LikeStorage {
                 + "GROUP BY films.id ORDER BY COUNT(film_likes.user_id) DESC LIMIT ?";
         //@formatter:on
 
-
         return jdbcTemplate.query(getPopularQuery, (rs, rowNum) -> {
             Long filmId = rs.getLong("id");
             String filmName = rs.getString("name");
