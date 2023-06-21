@@ -64,4 +64,9 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
         return films.remove(filmId);
     }
+
+    @Override
+    public List<Film> getRecommendations(Long id) {
+        return null;
+    }
 }
