@@ -10,9 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
-import ru.yandex.practicum.filmorate.mapper.LikeMapper;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.model.FilmColumn;
 
@@ -103,56 +101,18 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getRecommendations(Long id) {
-        String c = "select t1.user_id \n" +
-                "from film_likes t1 join film_likes t2 ON t1.film_id = t2.film_id\n" +
-                "and t1.user_id != t2.user_id\n" +
-                "WHERE t1.user_id = ?\n" +
-                "group by t1.user_id, t2.user_id\n" +
-                "order by count(*) desc limit 1";
-
-
+        String sql = "SELECT f.* FROM film_likes fl JOIN films f ON f.id = fl.film_id " +
+                "WHERE fl.user_id = (SELECT t2.user_id " +
+                "FROM film_likes t1 JOIN film_likes t2 ON t1.film_id = t2.film_id " +
+                "AND t1.user_id != t2.user_id WHERE t1.user_id = ? GROUP BY t1.user_id, t2.user_id " +
+                "ORDER BY count(*) DESC LIMIT 1) " +
+                "AND fl.film_id NOT IN (SELECT film_id FROM film_likes WHERE user_id = ?)";
+        List<FilmColumn> filmColumns = jdbcTemplate.query(sql, new FilmMapper(), id, id);
+        List<Film> recommended = new ArrayList<>();
+        for (FilmColumn filmColumn : filmColumns) {
+            recommended.add(fromColumnsToDto(Objects.requireNonNull(filmColumn)));
         }
-
-
-
-
-
-
-
-
-
-
-
-
-        /*long reliedUserId = 0;
-        long confidence = 0;
-        long count = 0;
-        for (FilmColumn mainUserFilm : mainUserFilms) {
-            List<Long> likes = likeStorage.getLikes(mainUserFilm.getId());
-            likes.remove(id);
-            if (likes.isEmpty()) {
-                continue;
-            }
-            for (Long userId: likes) {
-                for (FilmColumn userFilm : jdbcTemplate.query(sql, new FilmMapper(), userId)) {
-                    if (mainUserFilms.contains(userFilm)) {
-                        count++;
-                    }
-                }
-                if (count > confidence) {
-                    confidence = count;
-                    reliedUserId = userId;
-                }
-            }
-        }
-        List<Film> recommendation = new ArrayList<>();
-        for (FilmColumn newFilm: jdbcTemplate.query(sql, new FilmMapper(), reliedUserId)) {
-            if (!mainUserFilms.contains(newFilm)) {
-                recommendation.add(fromColumnsToDto(Objects.requireNonNull(newFilm)));
-            }
-        }
-        return recommendation;*/
-
+        return recommended;
     }
 
     private Film fromColumnsToDto(FilmColumn filmColumn) {
