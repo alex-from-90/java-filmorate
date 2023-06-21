@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class FeedDbStorage implements FeedStorage {
 
     private final JdbcTemplate jdbcTemplate;
@@ -25,7 +25,7 @@ public class FeedDbStorage implements FeedStorage {
         return jdbcTemplate.query(sql, new FeedMapper(), id);
     }
 
-    public Feed addFeed(Feed feed) {
+    public void addFeed(Feed feed) {
 
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("feeds")
@@ -42,6 +42,5 @@ public class FeedDbStorage implements FeedStorage {
 
         feed.setFeedId(feedId);
 
-        return feed;
     }
 }

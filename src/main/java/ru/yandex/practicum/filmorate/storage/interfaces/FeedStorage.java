@@ -8,5 +8,5 @@ public interface FeedStorage {
 
     List<Feed> getFeedByUserId(long id);
 
-    Feed addFeed(Feed feed);
+    void addFeed(Feed feed);
 }

@@ -59,8 +59,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}/feed")
-    public List<Feed> getFeedByUserId(@PathVariable long userId) {
-        return feedService.getFeedByUserId(userId);
+    public List<Feed> getFeedByUserId(@PathVariable Long id) {
+        return feedService.getFeedByUserId(id);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
