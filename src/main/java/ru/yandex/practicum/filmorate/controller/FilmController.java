@@ -62,4 +62,9 @@ public class FilmController {
         log.info("Получен DELETE-запрос к эндпоинту: '/films' на удаление фильма с ID={}", id);
         return filmService.delete(id);
     }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getDirectorFilms(@PathVariable int directorId, @RequestParam String sortBy) {
+        return filmService.getDirectorFilms(directorId, sortBy);
+    }
 }
