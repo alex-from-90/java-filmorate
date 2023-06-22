@@ -41,6 +41,8 @@ public class Film {
 
     private Set<Long> likes = new HashSet<>();
 
+    private Set<Director> directors = new HashSet<>();
+
     @JsonSetter
     public void setGenres(Set<Genre> genres) {
         this.genres = genres.stream()
