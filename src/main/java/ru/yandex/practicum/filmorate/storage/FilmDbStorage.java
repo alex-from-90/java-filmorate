@@ -86,9 +86,9 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(Long filmId) {
-        //@formatter:off
+
         String sqlQuery = "SELECT * FROM films WHERE id = ?";
-        //@formatter:on
+
         try {
             FilmColumn filmColumn = jdbcTemplate.queryForObject(sqlQuery, new FilmMapper(), filmId);
             return fromColumnsToDto(Objects.requireNonNull(filmColumn));
@@ -98,15 +98,13 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteFilmById(Long filmId) {
-        //@formatter:off
+    public Film delete(Long filmId) {
+        Film film = getFilmById(filmId);
         String sqlQuery = "DELETE FROM films WHERE id = ? ";
-        //@formatter:on
         if (jdbcTemplate.update(sqlQuery, filmId) == 0) {
             throw new NotFoundException("Фильм с ID=" + filmId + " не найден!");
-        } else {
-            log.info("Фильм с ID={} удален", filmId);
         }
+        return film;
     }
 
     @Override

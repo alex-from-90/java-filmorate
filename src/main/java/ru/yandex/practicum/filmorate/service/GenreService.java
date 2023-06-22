@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
@@ -24,16 +23,8 @@ public class GenreService {
         return genreStorage.getGenreById(id);
     }
 
-    public void putGenres(Film film) {
-        genreStorage.delete(film);
-        genreStorage.add(film);
-    }
-
     public Set<Genre> getFilmGenres(Long filmId) {
         return new HashSet<>(genreStorage.getFilmGenres(filmId));
     }
 
-    public void updateFilmGenres(Film film) {
-        genreStorage.updateGenres(film);
-    }
 }

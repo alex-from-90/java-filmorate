@@ -91,4 +91,3 @@ CREATE TABLE IF NOT EXISTS review_like
     is_useful BOOLEAN,
     primary key (review_id, user_id)
 );
-
