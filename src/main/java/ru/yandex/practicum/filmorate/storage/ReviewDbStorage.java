@@ -149,6 +149,7 @@ public class ReviewDbStorage {
 
     //Добавить дизлайк
     public void addDislike(Long reviewId, Long userId) {
+        deleteLike(reviewId, userId); // удалить лайк при дизлайке
         String mergeQuery = "MERGE INTO REVIEWS r " +
                 "USING (SELECT 1 FROM review_like WHERE review_id = ? AND user_id = ? AND IS_USEFUL = true) l " +
                 "ON (r.review_id = ?) " +
