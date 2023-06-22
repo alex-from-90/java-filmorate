@@ -42,14 +42,16 @@ public class InMemoryFilmStorage implements FilmStorage {
             films.put(film.getId(), film);
             return film;
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм с ID=" + film.getId() + " не найден!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Фильм с ID=" + film.getId() + " не найден!");
         }
     }
 
     @Override
     public Film getFilmById(Long filmId) {
         if (!films.containsKey(filmId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм с ID=" + filmId + " не найден!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Фильм с ID=" + filmId + " не найден!");
         }
         return films.get(filmId);
     }
@@ -67,6 +69,11 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getRecommendations(Long id) {
+        return null;
+    }
+
+    @Override
+    public List<Film> getDirectorFilms(int directorId, String sortBy) {
         return null;
     }
 
