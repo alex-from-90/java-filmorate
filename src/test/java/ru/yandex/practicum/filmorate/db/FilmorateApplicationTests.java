@@ -128,7 +128,7 @@ class FilmorateApplicationTests {
     @Test
     public void testDeleteUser() {
         User createdUser = userStorage.createUser(firstUser);
-        userStorage.delete(createdUser.getId());
+        userStorage.deleteUserById(createdUser.getId());
         List<User> listUsers = userStorage.getAllUsers();
         assertThat(listUsers).hasSize(0);
     }
