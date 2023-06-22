@@ -35,12 +35,6 @@ public class FilmController {
         return filmService.update(film);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteFilmById(@PathVariable Long id) {
-        log.info("Получен DELETE-запрос к эндпоинту: '/films' на удаление фильма с ID={}", id);
-        filmService.delete(id);
-    }
-
     @GetMapping("/{id}")
     public Film getFilmById(@PathVariable Long id) {
         log.info("Получен GET-запрос к эндпоинту: '/films' на получение фильма с ID={}", id);
