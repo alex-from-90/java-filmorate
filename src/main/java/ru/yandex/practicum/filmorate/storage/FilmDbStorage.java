@@ -5,6 +5,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -101,11 +104,52 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> filmsSearch(String query, String by) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        for (String s : by.split(",")) {
+            params.addValue(s, query + "%");
+        }
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        List<FilmColumn> filmColumns;
+        if (params.getValues().size() == 2) {
+            filmColumns = namedParameterJdbcTemplate.query(
+                    "SELECT  FILMS.* FROM FILMS, FILM_LIKES As fl WHERE FILMS.ID IN (SELECT FILM_ID" +
+                            " FROM FILM_DIRECTOR LEFT JOIN DIRECTORS D on D.ID = FILM_DIRECTOR.DIRECTOR_ID" +
+                            "  WHERE D.NAME LIKE :director) OR  FILMS.NAME LIKE :title GROUP BY fl.FILM_ID" +
+                            " ORDER BY COUNT(fl.FILM_ID);",
+                    params,
+                    new FilmMapper()
+            );
+        } else {
+            filmColumns = namedParameterJdbcTemplate.query(
+                    params.getValues().containsKey("title") ? "SELECT  FILMS.* FROM FILMS, FILM_LIKES As fl" +
+                            " WHERE FILMS.NAME LIKE %title GROUP BY fl.FILM_ID ORDER BY COUNT(fl.FILM_ID)" :
+                            "SELECT  FILMS.* FROM FILMS, FILM_LIKES As fl WHERE FILMS.ID IN (SELECT FILM_ID" +
+                            " FROM FILM_DIRECTOR LEFT JOIN DIRECTORS D on D.ID = FILM_DIRECTOR.DIRECTOR_ID" +
+                                    " WHERE D.NAME LIKE :director) ORDER BY COUNT(fl.FILM_ID);",
+                    params,
+                    new FilmMapper()
+            );
+        }
+        return filmColumns.stream().map(this::fromColumnsToDto).collect(Collectors.toList());
+        /*List<FilmColumn> filmColumns = namedParameterJdbcTemplate.query(
+                params.getValues().size() == 2 ?
+                        getDirectorSql + " OR  FILMS.NAME LIKE :title GROUP BY fl.FILM_ID" +
+                                " ORDER BY COUNT(fl.FILM_ID);" :
+                        params.getValues().containsKey("title") ?
+                                "SELECT  FILMS.* FROM FILMS, FILM_LIKES As fl WHERE FILMS.NAME LIKE %title GROUP BY fl.FILM_ID" +
+                                        " ORDER BY COUNT(fl.FILM_ID);" :
+                                getDirectorSql + "ORDER BY COUNT(fl.FILM_ID);",
+                params,
+                new FilmMapper()
+        );
+        return filmColumns.stream().map(this::fromColumnsToDto).collect(Collectors.toList());
         String director = "";
         String title = "";
         if (by.contains("director")) director = query;
         if (by.contains("title")) title = query;
         List<FilmColumn> filmColumns = jdbcTemplate.query(
+                params.getValues().containsKey("director") ?
                 "SELECT  FILMS.* FROM FILMS, FILM_LIKES As fl WHERE FILMS.ID IN (SELECT FILM_ID" +
                         " FROM FILM_DIRECTOR LEFT JOIN DIRECTORS D on D.ID = FILM_DIRECTOR.DIRECTOR_ID" +
                         "  WHERE D.NAME LIKE '%' || ? || '%')OR  FILMS.NAME LIKE '%' || ? || '%' GROUP BY fl.FILM_ID" +
@@ -114,8 +158,7 @@ public class FilmDbStorage implements FilmStorage {
                 director,
                 title
         );
-
-        return filmColumns.stream().map(this::fromColumnsToDto).collect(Collectors.toList());
+        return filmColumns.stream().map(this::fromColumnsToDto).collect(Collectors.toList());*/
     }
 
     @Override
