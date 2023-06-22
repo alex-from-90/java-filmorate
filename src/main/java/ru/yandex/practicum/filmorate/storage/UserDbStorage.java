@@ -93,6 +93,4 @@ public class UserDbStorage implements UserStorage {
             log.info("Пользователь с ID={} успешно удален", user.getId());
         }
     }
-
-
 }

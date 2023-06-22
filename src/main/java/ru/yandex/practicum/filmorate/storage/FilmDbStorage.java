@@ -97,7 +97,6 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-
     @Override
     public void deleteFilmById(Long filmId) {
         //@formatter:off
@@ -112,12 +111,12 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getRecommendations(Long id) {
-        String sql = "SELECT f.* FROM film_likes fl JOIN films f ON f.id = fl.film_id " +
-                "WHERE fl.user_id = (SELECT t2.user_id " +
-                "FROM film_likes t1 JOIN film_likes t2 ON t1.film_id = t2.film_id " +
-                "AND t1.user_id != t2.user_id WHERE t1.user_id = ? GROUP BY t1.user_id, t2.user_id " +
-                "ORDER BY count(*) DESC LIMIT 1) " +
-                "AND fl.film_id NOT IN (SELECT film_id FROM film_likes WHERE user_id = ?)";
+        String sql = "SELECT f.* FROM film_likes fl JOIN films f ON f.id = fl.film_id "
+                + "WHERE fl.user_id = (SELECT t2.user_id "
+                + "FROM film_likes t1 JOIN film_likes t2 ON t1.film_id = t2.film_id "
+                + "AND t1.user_id != t2.user_id WHERE t1.user_id = ? GROUP BY t1.user_id, t2.user_id "
+                + "ORDER BY count(*) DESC LIMIT 1) "
+                + "AND fl.film_id NOT IN (SELECT film_id FROM film_likes WHERE user_id = ?)";
         List<FilmColumn> filmColumns = jdbcTemplate.query(sql, new FilmMapper(), id, id);
         List<Film> recommended = new ArrayList<>();
         for (FilmColumn filmColumn : filmColumns) {
