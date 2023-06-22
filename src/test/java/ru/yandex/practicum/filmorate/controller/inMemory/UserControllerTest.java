@@ -17,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UserControllerTest {
-    private User user;
     private static Validator validator;
+    private User user;
     private Set<ConstraintViolation<User>> violations;
 
     @BeforeEach
@@ -91,7 +91,8 @@ public class UserControllerTest {
 
     @Test
     public void testFutureBirthday() {
-        user.setBirthday(LocalDate.parse(String.valueOf(LocalDate.now().plusDays(1))));
+        user.setBirthday(LocalDate.parse(String.valueOf(LocalDate.now()
+                .plusDays(1))));
         violations = validator.validate(user);
         assertEquals(1, violations.size(), "Ошибки валидации");
     }

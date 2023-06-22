@@ -20,7 +20,8 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User createUser(@Valid User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
+        if (user.getName() == null || user.getName()
+                .isBlank()) {
             user.setName(user.getLogin());
         }
         user.setId(userIdCounter++);
@@ -35,7 +36,8 @@ public class InMemoryUserStorage implements UserStorage {
 
             return user;
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь с ID=" + user.getId() + " не найден!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Пользователь с ID=" + user.getId() + " не найден!");
         }
     }
 
@@ -47,23 +49,25 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User getUserById(Long userId) {
         if (!userMap.containsKey(userId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь с ID=" + userId + " не найден!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Пользователь с ID=" + userId + " не найден!");
         }
         return userMap.get(userId);
     }
 
     @Override
-    public User delete(Long userId) {
+    public void deleteUserById(Long userId) {
         if (userId == null) {
             throw new ValidationException("Передан пустой ID!");
         }
         if (!userMap.containsKey(userId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь с ID=" + userId + " не найден!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Пользователь с ID=" + userId + " не найден!");
         }
         // удаляем из списка друзей пользователя у других пользователей
         for (User user : userMap.values()) {
-            user.getFriends().remove(userId);
+            user.getFriends()
+                    .remove(userId);
         }
-        return userMap.remove(userId);
     }
 }
