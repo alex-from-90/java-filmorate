@@ -61,6 +61,10 @@ public class UserService {
         return userStorage.getUserById(id);
     }
 
+    public void deleteUserById(Long id) {
+        userStorage.deleteUserById(id);
+    }
+
     public List<Film> getRecommendations(Long id) {
         return filmStorage.getRecommendations(id);
     }

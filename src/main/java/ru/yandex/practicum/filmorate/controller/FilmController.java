@@ -23,13 +23,15 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        log.info("Получен POST-запрос к эндпоинту: '/films' на добавление фильма с ID={}", film.getId());
+        log.info("Получен POST-запрос к эндпоинту: '/films' на добавление фильма с ID={}",
+                film.getId());
         return filmService.create(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        log.info("Получен PUT-запрос к эндпоинту: '/films' на обновление фильма с ID={}", film.getId());
+        log.info("Получен PUT-запрос к эндпоинту: '/films' на обновление фильма с ID={}",
+                film.getId());
         return filmService.update(film);
     }
 
@@ -37,6 +39,12 @@ public class FilmController {
     public Film getFilmById(@PathVariable Long id) {
         log.info("Получен GET-запрос к эндпоинту: '/films' на получение фильма с ID={}", id);
         return filmService.getFilmById(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public Film delete(@PathVariable Long id) {
+        log.info("Получен DELETE-запрос к эндпоинту: '/films' на удаление фильма с ID={}", id);
+        return filmService.delete(id);
     }
 
     @GetMapping("/popular")
@@ -53,14 +61,9 @@ public class FilmController {
 
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
-        log.info("Получен DELETE-запрос к эндпоинту: '/films' на удаление лайка у фильма с ID={}", id);
+        log.info("Получен DELETE-запрос к эндпоинту: '/films' на удаление лайка у фильма с ID={}",
+                id);
         filmService.deleteLike(id, userId);
-    }
-
-    @DeleteMapping("/{id}")
-    public Film delete(@PathVariable Long id) {
-        log.info("Получен DELETE-запрос к эндпоинту: '/films' на удаление фильма с ID={}", id);
-        return filmService.delete(id);
     }
 
     @GetMapping("/director/{directorId}")
