@@ -46,4 +46,8 @@ public class FilmService {
     public Film delete(Long id) {
         return filmStorage.delete(id);
     }
+
+    public List<Film> filmSearch(String query, String by) {
+        return filmStorage.filmsSearch(query, by);
+    }
 }

@@ -62,4 +62,10 @@ public class FilmController {
         log.info("Получен DELETE-запрос к эндпоинту: '/films' на удаление фильма с ID={}", id);
         return filmService.delete(id);
     }
+
+    @GetMapping("/search")
+    public List<Film> filmsSearch(@RequestParam String query, @RequestParam(defaultValue = "") String by) {
+        log.info("Получен GET-запрос к эндпоинту: '/films' на поиск по:" + query + " " + by);
+        return filmService.filmSearch(query, by);
+    }
 }

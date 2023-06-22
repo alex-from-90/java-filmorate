@@ -64,4 +64,9 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
         return films.remove(filmId);
     }
+
+    @Override
+    public List<Film> filmsSearch(String query, String by) {
+    return null;
+    }
 }

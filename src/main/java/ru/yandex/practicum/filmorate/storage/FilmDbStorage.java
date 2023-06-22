@@ -99,6 +99,25 @@ public class FilmDbStorage implements FilmStorage {
         return film;
     }
 
+    @Override
+    public List<Film> filmsSearch(String query, String by) {
+        String director = "";
+        String title = "";
+        if (by.contains("director")) director = query;
+        if (by.contains("title")) title = query;
+        List<FilmColumn> filmColumns = jdbcTemplate.query(
+                "SELECT  FILMS.* FROM FILMS, FILM_LIKES As fl WHERE FILMS.ID IN (SELECT FILM_ID" +
+                        " FROM FILM_DIRECTOR LEFT JOIN DIRECTORS D on D.ID = FILM_DIRECTOR.DIRECTOR_ID" +
+                        "  WHERE D.NAME LIKE '%' || ? || '%')OR  FILMS.NAME LIKE '%' || ? || '%' GROUP BY fl.FILM_ID" +
+                        " ORDER BY COUNT(fl.FILM_ID);",
+                new FilmMapper(),
+                director,
+                title
+        );
+
+        return filmColumns.stream().map(this::fromColumnsToDto).collect(Collectors.toList());
+    }
+
     private Film fromColumnsToDto(FilmColumn filmColumn) {
         Film film = new Film();
         film.setId(filmColumn.getId());
