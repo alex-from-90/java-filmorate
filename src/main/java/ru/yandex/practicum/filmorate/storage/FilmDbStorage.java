@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Primary // Наставник разрешил использовать вместо @Qualifier
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
 
@@ -27,18 +29,20 @@ public class FilmDbStorage implements FilmStorage {
     private final GenreStorage genreStorage;
     private final LikeStorage likeStorage;
 
-
     public List<Film> getFilms() {
+        //@formatter:off
         String sql = "SELECT * FROM films";
+        //@formatter:on
         List<FilmColumn> filmColumns = jdbcTemplate.query(sql, new FilmMapper());
-
-        return filmColumns.stream().map(this::fromColumnsToDto).collect(Collectors.toList());
+        return filmColumns.stream()
+                .map(this::fromColumnsToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public Film create(Film film) {
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("films")
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName(
+                        "films")
                 .usingGeneratedKeyColumns("id");
 
         Map<String, Object> parameters = new HashMap<>();
@@ -46,10 +50,13 @@ public class FilmDbStorage implements FilmStorage {
         parameters.put("description", film.getDescription());
         parameters.put("duration", film.getDuration());
         parameters.put("release_date", film.getReleaseDate());
-        parameters.put("rating_id", film.getMpa().getId());
-        long generatedId = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
+        parameters.put("rating_id", film.getMpa()
+                .getId());
+        long generatedId = simpleJdbcInsert.executeAndReturnKey(parameters)
+                .longValue();
         film.setId(generatedId);
-        film.setMpa(mpaStorage.getMpaById(film.getMpa().getId())); //Напрямую, мимо сервисов
+        film.setMpa(mpaStorage.getMpaById(film.getMpa()
+                .getId())); //Напрямую, мимо сервисов
         genreStorage.add(film);
 
         return film;
@@ -57,19 +64,18 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film update(Film film) {
-        String sqlQuery = "UPDATE films SET " +
-                "name = ?, description = ?, release_date = ?, duration = ?, " +
-                "rating_id = ? WHERE id = ?";
-        int updateCount = jdbcTemplate.update(sqlQuery,
-                film.getName(),
-                film.getDescription(),
-                film.getReleaseDate(),
-                film.getDuration(),
-                film.getMpa().getId(),
-                film.getId());
+        //@formatter:off
+        String sqlQuery = "UPDATE films SET "
+                + "name = ?, description = ?, release_date = ?, duration = ?, "
+                + "rating_id = ? WHERE id = ?";
+        //@formatter:on
+        int updateCount = jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(),
+                film.getReleaseDate(), film.getDuration(), film.getMpa()
+                        .getId(), film.getId());
 
         if (updateCount != 0) {
-            film.setMpa(mpaStorage.getMpaById(film.getMpa().getId()));
+            film.setMpa(mpaStorage.getMpaById(film.getMpa()
+                    .getId()));
             genreStorage.updateGenres(film); //Напрямую, мимо сервисов
 
             return film;
@@ -80,7 +86,9 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(Long filmId) {
+        //@formatter:off
         String sqlQuery = "SELECT * FROM films WHERE id = ?";
+        //@formatter:on
         try {
             FilmColumn filmColumn = jdbcTemplate.queryForObject(sqlQuery, new FilmMapper(), filmId);
             return fromColumnsToDto(Objects.requireNonNull(filmColumn));
@@ -90,23 +98,25 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film delete(Long filmId) {
-        Film film = getFilmById(filmId);
+    public void deleteFilmById(Long filmId) {
+        //@formatter:off
         String sqlQuery = "DELETE FROM films WHERE id = ? ";
+        //@formatter:on
         if (jdbcTemplate.update(sqlQuery, filmId) == 0) {
             throw new NotFoundException("Фильм с ID=" + filmId + " не найден!");
+        } else {
+            log.info("Фильм с ID={} удален", filmId);
         }
-        return film;
     }
 
     @Override
     public List<Film> getRecommendations(Long id) {
-        String sql = "SELECT f.* FROM film_likes fl JOIN films f ON f.id = fl.film_id " +
-                "WHERE fl.user_id = (SELECT t2.user_id " +
-                "FROM film_likes t1 JOIN film_likes t2 ON t1.film_id = t2.film_id " +
-                "AND t1.user_id != t2.user_id WHERE t1.user_id = ? GROUP BY t1.user_id, t2.user_id " +
-                "ORDER BY count(*) DESC LIMIT 1) " +
-                "AND fl.film_id NOT IN (SELECT film_id FROM film_likes WHERE user_id = ?)";
+        String sql = "SELECT f.* FROM film_likes fl JOIN films f ON f.id = fl.film_id "
+                + "WHERE fl.user_id = (SELECT t2.user_id "
+                + "FROM film_likes t1 JOIN film_likes t2 ON t1.film_id = t2.film_id "
+                + "AND t1.user_id != t2.user_id WHERE t1.user_id = ? GROUP BY t1.user_id, t2.user_id "
+                + "ORDER BY count(*) DESC LIMIT 1) "
+                + "AND fl.film_id NOT IN (SELECT film_id FROM film_likes WHERE user_id = ?)";
         List<FilmColumn> filmColumns = jdbcTemplate.query(sql, new FilmMapper(), id, id);
         List<Film> recommended = new ArrayList<>();
         for (FilmColumn filmColumn : filmColumns) {

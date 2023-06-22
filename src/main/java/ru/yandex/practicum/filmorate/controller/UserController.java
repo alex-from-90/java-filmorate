@@ -36,6 +36,13 @@ public class UserController {
         return userService.updateUser(user);
     }
 
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        log.info("Получен DELETE-запрос к эндпоинту: '/users' на удаление пользователя с ID={}",
+                id);
+        userService.deleteUserById(id);
+    }
+
     @GetMapping
     public List<User> getAllUsers() {
         log.info("Получен GET-запрос к эндпоинту: '/users' на вывод списка всех пользователей");
@@ -87,7 +94,9 @@ public class UserController {
 
     @GetMapping("/{id}/recommendations")
     public List<Film> getRecommendations(@PathVariable Long id) {
-        log.info("Получен GET-запрос к эндпоинту: '/users' на получение рекоммендаций пользователю с ID={}", id);
+        log.info(
+                "Получен GET-запрос к эндпоинту: '/users' на получение рекоммендаций пользователю с ID={}",
+                id);
         return userService.getRecommendations(id);
     }
 }
