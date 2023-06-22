@@ -23,6 +23,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * //По отзывам в ревью используем BeanPropertyRowMapper вместо маппера
+ * Упростили проверку на наличие записи в таблице
+ * <p>
+ * Используемые Spring-методы:
+ * - `BeanPropertySqlParameterSource` используется для создания параметров запроса на основе свойств объекта отзыва.
+ * Это позволяет автоматически сопоставить значения свойств объекта с именами параметров в SQL-запросе.
+ * Данный метод использует рефлексию для получения значения свойств объекта.
+ * - `
+ * SimpleJdbcInsert` используется для упрощения вставки данных в таблицу базы данных.
+ * Он позволяет указать имя таблицы и генерируемые столбцы сгенерированного ключа (если применимо).
+ * В данном случае, объект `SimpleJdbcInsert` настроен на работу с таблицей "REVIEWS" и указание столбца "review_id"
+ * как генерируемого ключа. Затем выполняется вставка данных в таблицу и возвращается сгенерированный идентификатор отзыва.
+ * <p>
+ * - `NamedParameterJdbcTemplate` предоставляет удобный способ выполнения именованных запросов с параметрами.
+ * В данном случае, он используется для выполнения запроса на получение списка отзывов.
+ * <p>
+ * - `MapSqlParameterSource` используется для создания параметров запроса на основе карты значений.
+ * Каждая пара ключ-значение из карты представляет собой имя параметра и его значение.
+ * В данном случае, создается объект `MapSqlParameterSource` на основе карты значений `paramMap`,
+ * которая содержит параметры запроса filmId и count.
+ * <p>
+ * - `BeanPropertyRowMapper` используется для маппинга результатов запроса в объекты отзывов.
+ * Этот маппер автоматически сопоставляет столбцы результирующего набора данных с полями объекта отзыва
+ * на основе их имен. Возвращается список отзывов, полученных из результирующего набора.
+ **/
+
 @Primary
 @Component
 @RequiredArgsConstructor
@@ -32,35 +59,6 @@ public class ReviewDbStorage {
     private final FilmDbStorage filmDbStorage;
 
     //Отзывы
-
-    /**
-     * //По отзывам в ревью используем BeanPropertyRowMapper вместо маппера и merge в запросах, вместо insert (используем
-     * один запрос вместо 2х;
-     * <p>
-     * Упростили проверку на наличие записи в таблице
-     * <p>
-     * Используемые Spring-методы:
-     * - `BeanPropertySqlParameterSource` используется для создания параметров запроса на основе свойств объекта отзыва.
-     * Это позволяет автоматически сопоставить значения свойств объекта с именами параметров в SQL-запросе.
-     * Данный метод использует рефлексию для получения значения свойств объекта.
-     * - `
-     * SimpleJdbcInsert` используется для упрощения вставки данных в таблицу базы данных.
-     * Он позволяет указать имя таблицы и генерируемые столбцы сгенерированного ключа (если применимо).
-     * В данном случае, объект `SimpleJdbcInsert` настроен на работу с таблицей "REVIEWS" и указание столбца "review_id"
-     * как генерируемого ключа. Затем выполняется вставка данных в таблицу и возвращается сгенерированный идентификатор отзыва.
-     * - `NamedParameterJdbcTemplate` предоставляет удобный способ выполнения именованных запросов с параметрами.
-     * В данном случае, он используется для выполнения запроса на получение списка отзывов.
-     * <p>
-     * - `MapSqlParameterSource` используется для создания параметров запроса на основе карты значений.
-     * Каждая пара ключ-значение из карты представляет собой имя параметра и его значение.
-     * В данном случае, создается объект `MapSqlParameterSource` на основе карты значений `paramMap`,
-     * которая содержит параметры запроса filmId и count.
-     * <p>
-     * - `BeanPropertyRowMapper` используется для маппинга результатов запроса в объекты отзывов.
-     * Этот маппер автоматически сопоставляет столбцы результирующего набора данных с полями объекта отзыва
-     * на основе их имен. Возвращается список отзывов, полученных из результирующего набора.
-     **/
-
     public Review add(Review review) {
         review.setUseful(0L);
 
@@ -106,14 +104,23 @@ public class ReviewDbStorage {
     }
 
     public Review update(Review review) {
-        String updateReviewByIdQuery = "UPDATE reviews SET content = ?, is_positive = ? WHERE review_id = ?";
-        int updateCount = jdbcTemplate.update(updateReviewByIdQuery, review.getContent(), review.getIsPositive(), review.getReviewId());
+        Optional<Review> existingReview = getById(review.getReviewId());
+        if (existingReview.isPresent()) {
+            Review oldReview = existingReview.get();
+            review.setUserId(oldReview.getUserId());
+            review.setFilmId(oldReview.getFilmId());
+            review.setUseful(oldReview.getUseful());
 
-        if (updateCount == 0) {
+            String updateReviewByIdQuery = "UPDATE reviews SET content = ?, is_positive = ? WHERE review_id = ?";
+            jdbcTemplate.update(updateReviewByIdQuery,
+                    review.getContent(),
+                    review.getIsPositive(),
+                    review.getReviewId());
+
+            return review;
+        } else {
             throw new NotFoundException(String.format("Неверный id отзыва при обновлении. id = %d", review.getReviewId()));
         }
-
-        return review;
     }
 
     public void deleteById(Long reviewId) {
@@ -129,44 +136,31 @@ public class ReviewDbStorage {
     //Добавить лайк
     public void addLike(Long reviewId, Long userId) {
         deleteDislike(reviewId, userId); //При лайке удаляем дизлайк
-        String mergeQuery = "MERGE INTO REVIEWS r " +
-                "USING (SELECT ? AS review_id FROM DUAL) d " +
-                "ON (r.review_id = d.review_id) " +
-                "WHEN MATCHED THEN UPDATE SET r.useful = ?";
-
-        jdbcTemplate.update(mergeQuery, reviewId, countUseful(reviewId));
+        String addLikeQuery = "INSERT INTO review_like (review_id, user_id, IS_USEFUL) VALUES (?,?,true)";
+        jdbcTemplate.update(addLikeQuery, reviewId, userId);
+        jdbcTemplate.update("UPDATE REVIEWS SET useful = ? WHERE review_id = ?", countUseful(reviewId), reviewId);
     }
 
     //Удалить лайк
     public void deleteLike(Long reviewId, Long userId) {
-        String mergeQuery = "MERGE INTO REVIEWS r " +
-                "USING (SELECT 1 FROM review_like WHERE review_id = ? AND user_id = ? AND IS_USEFUL = true) l " +
-                "ON (r.review_id = ?) " +
-                "WHEN MATCHED THEN UPDATE SET r.useful = ?";
-
-        jdbcTemplate.update(mergeQuery, reviewId, userId, reviewId, countUseful(reviewId));
+        String deleteLikeQuery = "DELETE FROM review_like WHERE review_id = ? AND user_id = ? AND IS_USEFUL = true";
+        jdbcTemplate.update(deleteLikeQuery, reviewId, userId);
+        jdbcTemplate.update("UPDATE REVIEWS SET useful = ? WHERE review_id = ?", countUseful(reviewId), reviewId);
     }
 
     //Добавить дизлайк
     public void addDislike(Long reviewId, Long userId) {
-        deleteLike(reviewId, userId); // удалить лайк при дизлайке
-        String mergeQuery = "MERGE INTO REVIEWS r " +
-                "USING (SELECT 1 FROM review_like WHERE review_id = ? AND user_id = ? AND IS_USEFUL = true) l " +
-                "ON (r.review_id = ?) " +
-                "WHEN MATCHED THEN UPDATE SET r.useful = r.useful - 1 " +
-                "WHEN NOT MATCHED THEN INSERT (review_id, user_id, useful) VALUES (?, ?, 0)";
-
-        jdbcTemplate.update(mergeQuery, reviewId, userId, reviewId, reviewId, userId);
+        deleteLike(reviewId, userId); // При длизлайке удаляем лайк
+        String addDislikeQuery = "INSERT INTO review_like (review_id, user_id, IS_USEFUL) VALUES (?,?,false)";
+        jdbcTemplate.update(addDislikeQuery, reviewId, userId);
+        jdbcTemplate.update("UPDATE REVIEWS SET useful = ? WHERE review_id = ?", countUseful(reviewId), reviewId);
     }
 
     //Удалить дизлайк
     public void deleteDislike(Long reviewId, Long userId) {
-        String mergeQuery = "MERGE INTO REVIEWS r " +
-                "USING (SELECT 1 FROM review_like WHERE review_id = ? AND user_id = ? AND IS_USEFUL = false) l " +
-                "ON (r.review_id = ?) " +
-                "WHEN MATCHED THEN UPDATE SET r.useful = ?";
-
-        jdbcTemplate.update(mergeQuery, reviewId, userId, reviewId, countUseful(reviewId));
+        String deleteDislikeQuery = "DELETE FROM review_like WHERE review_id = ? AND user_id = ? AND IS_USEFUL = false";
+        jdbcTemplate.update(deleteDislikeQuery, reviewId, userId);
+        jdbcTemplate.update("UPDATE REVIEWS SET useful = ? WHERE review_id = ?", countUseful(reviewId), reviewId);
     }
 
     //Полезность
