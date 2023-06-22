@@ -21,24 +21,24 @@ public class GenreStorage {
     GenreMapper genreMapper = new GenreMapper();
 
     public List<Genre> getGenres() {
+        //@formatter:off
         String sql = "SELECT * FROM genres ORDER BY id";
+        //@formatter:on
         return jdbcTemplate.query(sql, genreMapper);
     }
 
     public Genre getGenreById(Integer genreId) {
         Genre genre;
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("SELECT * FROM genres WHERE id = ?", genreId);
+        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("SELECT * FROM genres WHERE id = ?",
+                genreId);
         if (genreRows.first()) {
-            genre = new Genre(
-                    genreRows.getInt("id"),
-                    genreRows.getString("name")
-            );
+            genre = new Genre(genreRows.getInt("id"), genreRows.getString("name"));
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Жанр с ID=" + genreId + " не найден!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Жанр с ID=" + genreId + " не найден!");
         }
         return genre;
     }
-
 
     public void delete(Film film) {
         jdbcTemplate.update("DELETE FROM film_genres WHERE film_id = ?", film.getId());
@@ -54,11 +54,12 @@ public class GenreStorage {
     }
 
     public List<Genre> getFilmGenres(Long filmId) {
-        String sql = "SELECT * FROM film_genres" +
-                " INNER JOIN genres ON genre_id = id WHERE film_id = ?";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new Genre(
-                rs.getInt("genre_id"), rs.getString("name")), filmId
-        );
+        //@formatter:off
+        String sql = "SELECT * FROM film_genres"
+                + " INNER JOIN genres ON genre_id = id WHERE film_id = ?";
+        //@formatter:on
+        return jdbcTemplate.query(sql,
+                (rs, rowNum) -> new Genre(rs.getInt("genre_id"), rs.getString("name")), filmId);
     }
 
     public void updateGenres(Film film) {
@@ -72,5 +73,4 @@ public class GenreStorage {
             jdbcTemplate.update(insertGenresQuery, film.getId(), genre.getId());
         }
     }
-
 }

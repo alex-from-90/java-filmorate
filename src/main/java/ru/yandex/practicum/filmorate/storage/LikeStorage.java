@@ -39,21 +39,25 @@ public class LikeStorage {
             String deleteSql = "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";
             jdbcTemplate.update(deleteSql, filmId, userId);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Лайк для фильма с ID: " + filmId + " и User ID: " + userId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Лайк для фильма с ID: " + filmId + " и User ID: " + userId);
         }
     }
 
     public List<Film> getPopular(long count) {
-        String getPopularQuery = "SELECT films.*, rating_id " +
-                "FROM films LEFT JOIN film_likes ON films.id = film_likes.film_id " +
-                "GROUP BY films.id ORDER BY COUNT(film_likes.user_id) DESC LIMIT ?";
-
+        //@formatter:off
+        String getPopularQuery =
+                "SELECT films.*, rating_id "
+                + "FROM films LEFT JOIN film_likes ON films.id = film_likes.film_id "
+                + "GROUP BY films.id ORDER BY COUNT(film_likes.user_id) DESC LIMIT ?";
+        //@formatter:on
 
         return jdbcTemplate.query(getPopularQuery, (rs, rowNum) -> {
             Long filmId = rs.getLong("id");
             String filmName = rs.getString("name");
             String filmDescription = rs.getString("description");
-            LocalDate releaseDate = rs.getDate("release_date").toLocalDate();
+            LocalDate releaseDate = rs.getDate("release_date")
+                    .toLocalDate();
             Integer duration = rs.getInt("duration");
             Mpa mpa = mpaService.getMpaById(rs.getInt("rating_id"));
             Set<Genre> genres = genreService.getFilmGenres(filmId);
