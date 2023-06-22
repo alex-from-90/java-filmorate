@@ -3,11 +3,8 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-<<<<<<< HEAD
 import ru.yandex.practicum.filmorate.model.Feed;
-=======
 import ru.yandex.practicum.filmorate.model.Film;
->>>>>>> develop
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.UserService;
