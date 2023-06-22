@@ -73,7 +73,7 @@ public class FilmController {
 
     @GetMapping("/search")
     public List<Film> filmsSearch(@RequestParam String query, @RequestParam(defaultValue = "") String by) {
-        log.info("Получен GET-запрос к эндпоинту: '/films' на поиск по:" + query + " " + by);
+        log.info("Получен GET-запрос к эндпоинту: '/films' на поиск по: " + query + " " + by);
         return filmService.filmSearch(query, by);
     }
 }

@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -32,6 +31,7 @@ public class FilmDbStorage implements FilmStorage {
     private final GenreStorage genreStorage;
     private final LikeStorage likeStorage;
     private final DirectorStorage directorStorage;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     public List<Film> getFilms() {
         //@formatter:off
@@ -117,59 +117,25 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> filmsSearch(String query, String by) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         for (String s : by.split(",")) {
-            params.addValue(s, query + "%");
+            params.addValue(s, "%" + query + "%");
         }
 
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-        List<FilmColumn> filmColumns;
-        if (params.getValues().size() == 2) {
-            filmColumns = namedParameterJdbcTemplate.query(
-                    "SELECT  FILMS.* FROM FILMS, FILM_LIKES As fl WHERE FILMS.ID IN (SELECT FILM_ID" +
-                            " FROM FILM_DIRECTOR LEFT JOIN DIRECTORS D on D.ID = FILM_DIRECTOR.DIRECTOR_ID" +
-                            "  WHERE D.NAME LIKE :director) OR  FILMS.NAME LIKE :title GROUP BY fl.FILM_ID" +
-                            " ORDER BY COUNT(fl.FILM_ID);",
+        String sqlFilm = " ";
+        if (params.getValues().size() == 2) sqlFilm = "OR FILMS.NAME ILIKE :title";
+
+        List<FilmColumn> filmColumns = namedParameterJdbcTemplate.query(
+                "SELECT FILMS.*, COUNT(fl.FILM_ID) FROM FILMS LEFT JOIN FILM_LIKES fl on FILMS.ID = fl.FILM_ID " +
+                        (params.getValues().containsKey("director") ?
+                                " WHERE FILMS.ID IN (SELECT FILM_ID FROM FILMS_DIRECTORS LEFT JOIN DIRECTORS D on D.ID = " +
+                                        " FILMS_DIRECTORS.DIRECTOR_ID WHERE D.NAME ILIKE :director) " + sqlFilm :
+                                " WHERE FILMS.NAME ILIKE :title") +
+                        " GROUP BY fl.FILM_ID ORDER BY COUNT(fl.FILM_ID) desc",
                     params,
                     new FilmMapper()
             );
-        } else {
-            filmColumns = namedParameterJdbcTemplate.query(
-                    params.getValues().containsKey("title") ? "SELECT  FILMS.* FROM FILMS, FILM_LIKES As fl" +
-                            " WHERE FILMS.NAME LIKE %title GROUP BY fl.FILM_ID ORDER BY COUNT(fl.FILM_ID)" :
-                            "SELECT  FILMS.* FROM FILMS, FILM_LIKES As fl WHERE FILMS.ID IN (SELECT FILM_ID" +
-                            " FROM FILM_DIRECTOR LEFT JOIN DIRECTORS D on D.ID = FILM_DIRECTOR.DIRECTOR_ID" +
-                                    " WHERE D.NAME LIKE :director) ORDER BY COUNT(fl.FILM_ID);",
-                    params,
-                    new FilmMapper()
-            );
-        }
-        return filmColumns.stream().map(this::fromColumnsToDto).collect(Collectors.toList());
-        /*List<FilmColumn> filmColumns = namedParameterJdbcTemplate.query(
-                params.getValues().size() == 2 ?
-                        getDirectorSql + " OR  FILMS.NAME LIKE :title GROUP BY fl.FILM_ID" +
-                                " ORDER BY COUNT(fl.FILM_ID);" :
-                        params.getValues().containsKey("title") ?
-                                "SELECT  FILMS.* FROM FILMS, FILM_LIKES As fl WHERE FILMS.NAME LIKE %title GROUP BY fl.FILM_ID" +
-                                        " ORDER BY COUNT(fl.FILM_ID);" :
-                                getDirectorSql + "ORDER BY COUNT(fl.FILM_ID);",
-                params,
-                new FilmMapper()
-        );
-        return filmColumns.stream().map(this::fromColumnsToDto).collect(Collectors.toList());
-        String director = "";
-        String title = "";
-        if (by.contains("director")) director = query;
-        if (by.contains("title")) title = query;
-        List<FilmColumn> filmColumns = jdbcTemplate.query(
-                params.getValues().containsKey("director") ?
-                "SELECT  FILMS.* FROM FILMS, FILM_LIKES As fl WHERE FILMS.ID IN (SELECT FILM_ID" +
-                        " FROM FILM_DIRECTOR LEFT JOIN DIRECTORS D on D.ID = FILM_DIRECTOR.DIRECTOR_ID" +
-                        "  WHERE D.NAME LIKE '%' || ? || '%')OR  FILMS.NAME LIKE '%' || ? || '%' GROUP BY fl.FILM_ID" +
-                        " ORDER BY COUNT(fl.FILM_ID);",
-                new FilmMapper(),
-                director,
-                title
-        );
-        return filmColumns.stream().map(this::fromColumnsToDto).collect(Collectors.toList());*/
+        return filmColumns.stream()
+                .map(this::fromColumnsToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
