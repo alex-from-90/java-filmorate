@@ -24,7 +24,6 @@ public class ReviewService {
 
     //Добавить отзыв
     public Review add(Review review) {
-
         feedService.createFeed(review.getUserId(),
                 review.getFilmId(),
                 "REVIEW",
@@ -35,7 +34,6 @@ public class ReviewService {
 
     //Обновить отзыв
     public Review updateReview(Review review) {
-
         feedService.createFeed(review.getUserId(),
                 review.getFilmId(),
                 "REVIEW",
@@ -47,13 +45,13 @@ public class ReviewService {
     //Удалить отзыв
     public void deleteById(Long reviewId) {
         Review review = getReviewById(reviewId);
-
-        reviewStorage.deleteById(reviewId);
-
         feedService.createFeed(review.getUserId(),
                 review.getFilmId(),
                 "REVIEW",
                 "REMOVE");
+        reviewStorage.deleteById(reviewId);
+
+
     }
 
     //Получить отзыв по ID

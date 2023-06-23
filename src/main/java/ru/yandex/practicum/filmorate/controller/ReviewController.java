@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
 import javax.validation.Valid;
@@ -15,6 +16,7 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;
+    private final FeedService feedService;
 
     @PostMapping
     public Review addReview(@Valid @RequestBody Review review) {
@@ -29,7 +31,6 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{id}")
-
     public void deleteReview(@PathVariable Long id) {
         log.info("Получен DELETE запрос на удаление отзыва с id = {}", id);
         reviewService.deleteById(id);
