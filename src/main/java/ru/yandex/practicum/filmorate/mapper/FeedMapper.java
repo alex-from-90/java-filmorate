@@ -10,7 +10,7 @@ public class FeedMapper implements RowMapper<Feed> {
     @Override
     public Feed mapRow(ResultSet rs, int rowNum) throws SQLException {
         Feed feed = new Feed();
-        feed.setFeedId(rs.getLong("feed_id"));
+        feed.setEventId(rs.getLong("event_id"));
         feed.setTimestamp(rs.getLong("timestamp"));
         feed.setUserId(rs.getLong("user_id"));
         feed.setEventType(rs.getString("event_type"));

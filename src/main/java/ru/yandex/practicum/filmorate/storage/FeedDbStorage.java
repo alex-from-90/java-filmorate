@@ -6,7 +6,9 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.mapper.FeedMapper;
 import ru.yandex.practicum.filmorate.model.Feed;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.interfaces.FeedStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +31,7 @@ public class FeedDbStorage implements FeedStorage {
 
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("feeds")
-                .usingGeneratedKeyColumns("feed_id");
+                .usingGeneratedKeyColumns("event_id");
 
         Map<String, Object> values = new HashMap<>();
         values.put("timestamp", feed.getTimestamp());
@@ -40,7 +42,6 @@ public class FeedDbStorage implements FeedStorage {
 
         Long feedId = (Long) insert.executeAndReturnKey(values);
 
-        feed.setFeedId(feedId);
-
+        feed.setEventId(feedId);
     }
 }
