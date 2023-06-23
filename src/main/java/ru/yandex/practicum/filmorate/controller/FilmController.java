@@ -70,4 +70,10 @@ public class FilmController {
     public List<Film> getDirectorFilms(@PathVariable int directorId, @RequestParam String sortBy) {
         return filmService.getDirectorFilms(directorId, sortBy);
     }
+
+    @GetMapping("/search")
+    public List<Film> filmsSearch(@RequestParam String query, @RequestParam(defaultValue = "") String by) {
+        log.info("Получен GET-запрос к эндпоинту: '/films' на поиск по: " + query + " " + by);
+        return filmService.filmSearch(query, by);
+    }
 }
