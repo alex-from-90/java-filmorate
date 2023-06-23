@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 import java.util.Collection;
 
 @RestController
@@ -16,7 +17,6 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;
-    private final FeedService feedService;
 
     @PostMapping
     public Review addReview(@Valid @RequestBody Review review) {

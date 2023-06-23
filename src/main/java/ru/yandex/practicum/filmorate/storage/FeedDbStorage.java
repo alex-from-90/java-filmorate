@@ -6,9 +6,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.mapper.FeedMapper;
 import ru.yandex.practicum.filmorate.model.Feed;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.interfaces.FeedStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
 import javax.validation.Valid;
 import java.util.HashMap;
@@ -23,12 +21,14 @@ public class FeedDbStorage implements FeedStorage {
 
     public List<Feed> getFeedByUserId(long id) {
 
-        String sql = "SELECT * FROM feeds WHERE user_id = ?";
+        String sql = "SELECT event_id, timestamp, user_id, event_type, operation, entity_id FROM "
+                + "feeds "
+                + "WHERE user_id = ?";
 
         return jdbcTemplate.query(sql, new FeedMapper(), id);
     }
 
-    public void addFeed(@Valid Feed feed) {
+    public void addFeed(Feed feed) {
 
         if (feed.getUserId() > 0 && feed.getEntityId() > 0) {
             SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate)
@@ -46,5 +46,10 @@ public class FeedDbStorage implements FeedStorage {
 
             feed.setEventId(feedId);
         }
+
+        /*String sql = "INSERT INTO feeds (user_id, timestamp, event_type, operation, entity_id) "
+                + "VALUES (?,?,?,?,?)";
+        jdbcTemplate.update(sql, feed.getUserId(), feed.getTimestamp(), feed.getEventType(),
+                feed.getOperation(), feed.getEntityId());*/
     }
 }
