@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.ReviewDbStorage;
 
@@ -26,22 +25,36 @@ public class ReviewService {
 
     //Добавить отзыв
     public Review add(Review review) {
-        Review review1 = reviewStorage.add(review);
-        feedService.createFeed(review1.getUserId(), review1.getFilmId(), "REVIEW", "ADD");
-        return review1;
+        Review addedReview = reviewStorage.add(review);
+
+        feedService.createFeed(addedReview.getUserId(),
+                addedReview.getReviewId(),
+                "REVIEW",
+                "ADD");
+        return addedReview;
     }
 
     //Обновить отзыв
     public Review updateReview(Review review) {
-        Review review1 = reviewStorage.update(review);
-        feedService.createFeed(review1.getUserId(), review1.getFilmId(), "REVIEW", "UPDATE");
-        return review1;
+        Review addedReview = reviewStorage.update(review);
+
+        feedService.createFeed(addedReview.getUserId(),
+                addedReview.getReviewId(),
+                "REVIEW",
+                "UPDATE");
+
+        return addedReview;
     }
 
     //Удалить отзыв
     public void deleteById(Long reviewId) {
         Review review = getReviewById(reviewId);
-        feedService.createFeed(review.getUserId(), review.getFilmId(), "REVIEW", "REMOVE");
+
+        feedService.createFeed(review.getUserId(),
+                review.getReviewId(),
+                "REVIEW",
+                "REMOVE");
+
         reviewStorage.deleteById(reviewId);
     }
 
