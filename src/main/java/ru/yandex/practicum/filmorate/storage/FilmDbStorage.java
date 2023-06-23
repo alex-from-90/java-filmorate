@@ -28,6 +28,7 @@ public class FilmDbStorage implements FilmStorage {
     private final MpaStorage mpaStorage; // Поменяли сервисы на storage
     private final GenreStorage genreStorage;
     private final LikeStorage likeStorage;
+    private final DirectorStorage directorStorage;
 
     public List<Film> getFilms() {
         //@formatter:off
@@ -58,6 +59,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setMpa(mpaStorage.getMpaById(film.getMpa()
                 .getId())); //Напрямую, мимо сервисов
         genreStorage.add(film);
+        directorStorage.addDirectorToFilm(film);
 
         return film;
     }
@@ -77,6 +79,7 @@ public class FilmDbStorage implements FilmStorage {
             film.setMpa(mpaStorage.getMpaById(film.getMpa()
                     .getId()));
             genreStorage.updateGenres(film); //Напрямую, мимо сервисов
+            directorStorage.addDirectorToFilm(film);
 
             return film;
         } else {
@@ -123,6 +126,31 @@ public class FilmDbStorage implements FilmStorage {
         return recommended;
     }
 
+    @Override
+    public List<Film> getDirectorFilms(int directorId, String sortBy) {
+        String sql = "SELECT * FROM films " +
+                "INNER JOIN films_directors ON film_id = id WHERE director_id = ?";
+
+        List<FilmColumn> filmColumns = jdbcTemplate.query(sql, new FilmMapper(), directorId);
+        if (filmColumns.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Режиссер с ID=" + directorId + " не найден!");
+        }
+
+        List<Film> directorFilms = filmColumns.stream().map(this::fromColumnsToDto).collect(Collectors.toList());
+        switch (sortBy) {
+            case "likes":
+                return directorFilms.stream()
+                        .sorted(Comparator.comparingInt(o -> o.getLikes().size()))
+                        .collect(Collectors.toList());
+            case "year":
+                return directorFilms.stream()
+                        .sorted(Comparator.comparingInt(o -> o.getReleaseDate().getYear()))
+                        .collect(Collectors.toList());
+            default:
+                return new ArrayList<>();
+        }
+    }
+
     private Film fromColumnsToDto(FilmColumn filmColumn) {
         Film film = new Film();
         film.setId(filmColumn.getId());
@@ -132,6 +160,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setReleaseDate(filmColumn.getReleaseDate());
         film.setMpa(mpaStorage.getMpaById(filmColumn.getMpaId()));
         film.setGenres(new HashSet<>(genreStorage.getFilmGenres(film.getId())));
+        film.setDirectors(new HashSet<>(directorStorage.getFilmDirectors(film.getId())));
         film.setLikes(new HashSet<>(likeStorage.getLikes(filmColumn.getId())));
         return film;
     }
