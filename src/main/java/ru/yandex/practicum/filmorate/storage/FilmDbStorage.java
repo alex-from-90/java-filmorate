@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -29,6 +31,7 @@ public class FilmDbStorage implements FilmStorage {
     private final GenreStorage genreStorage;
     private final LikeStorage likeStorage;
     private final DirectorStorage directorStorage;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     public List<Film> getFilms() {
         //@formatter:off
@@ -108,6 +111,31 @@ public class FilmDbStorage implements FilmStorage {
             throw new NotFoundException("Фильм с ID=" + filmId + " не найден!");
         }
         return film;
+    }
+
+    @Override
+    public List<Film> filmsSearch(String query, String by) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        for (String s : by.split(",")) {
+            params.addValue(s, "%" + query + "%");
+        }
+
+        String sqlFilm = " ";
+        if (params.getValues().size() == 2) sqlFilm = "OR FILMS.NAME ILIKE :title";
+
+        List<FilmColumn> filmColumns = namedParameterJdbcTemplate.query(
+                "SELECT FILMS.*, COUNT(fl.FILM_ID) FROM FILMS LEFT JOIN FILM_LIKES fl on FILMS.ID = fl.FILM_ID " +
+                        (params.getValues().containsKey("director") ?
+                                " WHERE FILMS.ID IN (SELECT FILM_ID FROM FILMS_DIRECTORS LEFT JOIN DIRECTORS D on D.ID = " +
+                                        " FILMS_DIRECTORS.DIRECTOR_ID WHERE D.NAME ILIKE :director) " + sqlFilm :
+                                " WHERE FILMS.NAME ILIKE :title") +
+                        " GROUP BY fl.FILM_ID ORDER BY COUNT(fl.FILM_ID) desc",
+                    params,
+                    new FilmMapper()
+            );
+        return filmColumns.stream()
+                .map(this::fromColumnsToDto)
+                .collect(Collectors.toList());
     }
 
     @Override

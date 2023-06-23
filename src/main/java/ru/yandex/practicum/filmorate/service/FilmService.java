@@ -53,4 +53,8 @@ public class FilmService {
     public List<Film> getDirectorFilms(int directorId, String sortBy) {
         return filmStorage.getDirectorFilms(directorId, sortBy);
     }
+
+    public List<Film> filmSearch(String query, String by) {
+        return filmStorage.filmsSearch(query, by);
+    }
 }
