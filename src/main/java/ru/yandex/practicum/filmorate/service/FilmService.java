@@ -26,6 +26,11 @@ public class FilmService {
     public List<Film> getPopular(Integer count) {
         return likeStorage.getPopular(count);
     }
+    //TODO
+    public List<Film> getFilmsByRating(int count, int genreId, int year) {
+
+        return likeStorage.getPopularFilm(count, genreId, year);
+    }
 
     public List<Film> getFilms() {
         return filmStorage.getFilms();

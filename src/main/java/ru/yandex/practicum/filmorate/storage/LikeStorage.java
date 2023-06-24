@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.LikeMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -14,6 +15,7 @@ import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.MpaService;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,10 +23,11 @@ import java.util.Set;
 @Primary
 @Component
 @RequiredArgsConstructor
-public class LikeStorage {
+public abstract class LikeStorage {
     private final JdbcTemplate jdbcTemplate;
     private final MpaService mpaService;
     private final GenreService genreService;
+
 
     public void addLike(Long filmId, Long userId) {
         String sql = "INSERT INTO film_likes (film_id, user_id) VALUES (?, ?)";
@@ -42,6 +45,96 @@ public class LikeStorage {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Лайк для фильма с ID: " + filmId + " и User ID: " + userId);
         }
+    }
+
+    public List<Film> getPopularFilm(int count, int genreId, int year) {
+        String sql = "";
+        List<Film> films = new ArrayList<>();
+        if (genreId == -1 && year == -1) {
+            //log.info("Filtering populars films no parameters");
+            sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
+                    "COUNT(L.USER_ID) as RATING FROM FILMS " +
+                    "LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
+                    "GROUP BY FILMS.FILM_ID " +
+                    "ORDER BY RATING DESC LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
+                    rs.getLong("film_id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDate("releaseDate").toLocalDate(),
+                    rs.getInt("duration"),
+                    genreService.getFilmGenresAsMap(rs.getLong("film_id")),
+                    mpaService.getMpaById(rs.getInt("rate_id")),
+                    rs.getLong("rating")
+            ), count);
+
+        }
+        if (genreId > 0 && year == -1) {
+            //log.info("Filtering populars films by genre");
+            sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
+                    "COUNT(L.USER_ID) as RATING FROM FILMS " +
+                    "LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
+                    "LEFT JOIN FILM_GENRES F on FILMS.FILM_ID = F.FILM_ID " +
+                    "WHERE F.GENRE_ID=?" +
+                    " GROUP BY FILMS.FILM_ID,  F.GENRE_ID " +
+                    "ORDER BY RATING DESC LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
+                    rs.getLong("film_id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDate("releaseDate").toLocalDate(),
+                    rs.getInt("duration"),
+                    genreService.getFilmGenres(rs.getLong("film_id")),
+                    mpaService.getMpaById(rs.getInt("rate_id")),
+                    rs.getLong("rating")
+            ), genreId, count);
+        }
+        if (genreId == -1 && year > 0) {
+            //log.info("Filtering populars films by year");
+            sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
+                    "COUNT(L.USER_ID) as RATING FROM FILMS " +
+                    "LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
+                    "WHERE EXTRACT(YEAR FROM RELEASEDATE)=?" +
+                    " GROUP BY FILMS.FILM_ID" +
+                    " ORDER BY RATING DESC LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
+                    rs.getLong("film_id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDate("releaseDate").toLocalDate(),
+                    rs.getInt("duration"),
+                    genreService.getFilmGenres(rs.getLong("film_id")),
+                    mpaService.getMpaById(rs.getInt("rate_id")),
+                    rs.getLong("rating")
+            ), year, count);
+        }
+        if (genreId > 0 && year > 0) {
+            //log.info("Filtering populars films by genre and year");
+            sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
+                    "COUNT(L.USER_ID) as RATING FROM FILMS " +
+                    "LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
+                    "LEFT JOIN FILM_GENRES F on FILMS.FILM_ID = F.FILM_ID " +
+                    "WHERE F.GENRE_ID=?" +
+                    " AND EXTRACT(YEAR FROM RELEASEDATE)=?" +
+                    " GROUP BY FILMS.FILM_ID,  F.GENRE_ID " +
+                    "ORDER BY RATING DESC LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
+                    rs.getLong("film_id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDate("releaseDate").toLocalDate(),
+                    rs.getInt("duration"),
+                    genreService.getFilmGenres(rs.getLong("film_id")),
+                    mpaService.getMpaById(rs.getInt("rate_id")),
+                    rs.getLong("rating")
+            ), genreId, year, count);
+        }
+        if (genreId < -1 && year < -1) {
+            throw new ValidationException(String.format("Incorrect parameters for filtering populars - films" +
+                    " genreid = %d and year = %d.", genreId, year));
+        }
+
+        return films;
     }
 
     public List<Film> getPopular(long count) {
