@@ -6,12 +6,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.LikeMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.MpaService;
+import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -25,6 +27,7 @@ public class LikeStorage {
     private final JdbcTemplate jdbcTemplate;
     private final MpaService mpaService;
     private final GenreService genreService;
+    private final UserStorage userService;
 
     public void addLike(Long filmId, Long userId) {
         String sql = "INSERT INTO film_likes (film_id, user_id) VALUES (?, ?)";
@@ -46,8 +49,7 @@ public class LikeStorage {
 
     public List<Film> getPopular(long count) {
         //@formatter:off
-        String getPopularQuery =
-                "SELECT films.*, rating_id "
+        String getPopularQuery = "SELECT films.*, rating_id "
                 + "FROM films LEFT JOIN film_likes ON films.id = film_likes.film_id "
                 + "GROUP BY films.id ORDER BY COUNT(film_likes.user_id) DESC LIMIT ?";
         //@formatter:on

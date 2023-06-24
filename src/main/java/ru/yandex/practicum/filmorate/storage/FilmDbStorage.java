@@ -128,23 +128,28 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getDirectorFilms(int directorId, String sortBy) {
-        String sql = "SELECT * FROM films " +
-                "INNER JOIN films_directors ON film_id = id WHERE director_id = ?";
+        String sql = "SELECT * FROM films "
+                + "INNER JOIN films_directors ON film_id = id WHERE director_id = ?";
 
         List<FilmColumn> filmColumns = jdbcTemplate.query(sql, new FilmMapper(), directorId);
         if (filmColumns.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Режиссер с ID=" + directorId + " не найден!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Режиссер с ID=" + directorId + " не найден!");
         }
 
-        List<Film> directorFilms = filmColumns.stream().map(this::fromColumnsToDto).collect(Collectors.toList());
+        List<Film> directorFilms = filmColumns.stream()
+                .map(this::fromColumnsToDto)
+                .collect(Collectors.toList());
         switch (sortBy) {
             case "likes":
                 return directorFilms.stream()
-                        .sorted(Comparator.comparingInt(o -> o.getLikes().size()))
+                        .sorted(Comparator.comparingInt(o -> o.getLikes()
+                                .size()))
                         .collect(Collectors.toList());
             case "year":
                 return directorFilms.stream()
-                        .sorted(Comparator.comparingInt(o -> o.getReleaseDate().getYear()))
+                        .sorted(Comparator.comparingInt(o -> o.getReleaseDate()
+                                .getYear()))
                         .collect(Collectors.toList());
             default:
                 return new ArrayList<>();

@@ -50,8 +50,7 @@ public class UserDbStorage implements UserStorage {
     public User updateUser(User user) {
         if (getUserById(user.getId()) != null) {
             //@formatter:off
-            String sqlQuery = "UPDATE users SET "
-                    + "email = ?, login = ?, name = ?, birthday = ? "
+            String sqlQuery = "UPDATE users SET " + "email = ?, login = ?, name = ?, birthday = ? "
                     + "WHERE id = ?";
             //@formatter:on
             jdbcTemplate.update(sqlQuery, user.getEmail(), user.getLogin(), user.getName(),

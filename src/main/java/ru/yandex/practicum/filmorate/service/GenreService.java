@@ -26,5 +26,4 @@ public class GenreService {
     public Set<Genre> getFilmGenres(Long filmId) {
         return new HashSet<>(genreStorage.getFilmGenres(filmId));
     }
-
 }
