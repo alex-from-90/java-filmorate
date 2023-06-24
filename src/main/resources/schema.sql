@@ -9,7 +9,6 @@ DROP TABLE IF EXISTS review_like CASCADE;
 DROP TABLE IF EXISTS films_directors CASCADE;
 DROP TABLE IF EXISTS directors CASCADE;
 
-
 CREATE TABLE IF NOT EXISTS ratings_mpa
 (
     id
@@ -232,19 +231,9 @@ CREATE TABLE IF NOT EXISTS DIRECTORS
 
 CREATE TABLE IF NOT EXISTS FILMS_DIRECTORS
 (
-    film_id int REFERENCES films
-(
-    id
-) ON DELETE CASCADE,
-    director_id int REFERENCES directors
-(
-    id
-)
-  ON DELETE CASCADE,
-    PRIMARY KEY
-(
-    film_id,
-    director_id
-)
-    );
+
+    film_id int REFERENCES films(id) ON DELETE CASCADE,
+    director_id int REFERENCES directors(id) ON DELETE CASCADE,
+    PRIMARY KEY (film_id, director_id)
+);
 
