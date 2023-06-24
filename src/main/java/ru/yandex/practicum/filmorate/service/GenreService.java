@@ -5,7 +5,9 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -23,14 +25,5 @@ public class GenreService {
 
     public Set<Genre> getFilmGenres(Long filmId) {
         return new HashSet<>(genreStorage.getFilmGenres(filmId));
-    }
-
-    public Map<Integer, Genre> getFilmGenresAsMap(Long filmId) {
-        List<Genre> list = genreStorage.getFilmGenres(filmId);
-        HashMap<Integer, Genre> map = new HashMap<>();
-        for (int i = 0; i < list.size(); i++) {
-            map.put(i, list[i]);
-        }
-        return new HashMap<>(genreStorage.getFilmGenres(filmId));
     }
 }

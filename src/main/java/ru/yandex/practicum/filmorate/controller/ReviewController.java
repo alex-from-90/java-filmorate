@@ -43,32 +43,37 @@ public class ReviewController {
 
     @GetMapping
     public Collection<Review> findAll(@RequestParam(required = false) Long filmId,
-                                      @RequestParam(defaultValue = "10", required = false) Long count) {
-        log.info("Получен GET запрос на получение всех отзывов , filmId = {}, count = {}", filmId == null ? "all" : filmId, count);
+            @RequestParam(defaultValue = "10", required = false) Long count) {
+        log.info("Получен GET запрос на получение всех отзывов , filmId = {}, count = {}",
+                filmId == null ? "all" : filmId, count);
         return reviewService.getAllReviews(filmId, count);
     }
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable Long id, @PathVariable Long userId) {
-        log.info("Получен PUT-запрос к эндпоинту: '/reviews' на добавление лайка фильму с ID={}", id);
+        log.info("Получен PUT-запрос к эндпоинту: '/reviews' на добавление лайка фильму с ID={}",
+                id);
         reviewService.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
-        log.info("Получен DELETE-запрос к эндпоинту: '/reviews' на удаление лайка у фильма с ID={}", id);
+        log.info("Получен DELETE-запрос к эндпоинту: '/reviews' на удаление лайка у фильма с ID={}",
+                id);
         reviewService.deleteLike(id, userId);
     }
 
     @PutMapping("/{id}/dislike/{userId}")
     public void addUserDislike(@PathVariable Long id, @PathVariable Long userId) {
-        log.info("Получен PUT запрос на добавлени дизлайка id = {} от пользователя ID = {}", id, userId);
+        log.info("Получен PUT запрос на добавлени дизлайка id = {} от пользователя ID = {}", id,
+                userId);
         reviewService.addUserDislike(id, userId);
     }
 
     @DeleteMapping("/{id}/dislike/{userId}")
     public void deleteUserDislike(@PathVariable Long id, @PathVariable Long userId) {
-        log.info("Получен DELETE запрос на удаление дизлайка id = {} от пользователя ID = {}", id, userId);
+        log.info("Получен DELETE запрос на удаление дизлайка id = {} от пользователя ID = {}", id,
+                userId);
         reviewService.deleteUserDislike(id, userId);
     }
 }

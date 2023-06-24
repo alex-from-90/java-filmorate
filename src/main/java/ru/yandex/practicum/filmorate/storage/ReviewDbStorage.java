@@ -64,20 +64,23 @@ public class ReviewDbStorage {
 
         User user = userDbStorage.getUserById(review.getUserId());
         if (user == null || filmDbStorage.getFilmById(review.getFilmId()) == null) {
-            throw new NotFoundException(String.format("Неверный id (%d) при добавлении", review.getFilmId()));
+            throw new NotFoundException(
+                    String.format("Неверный id (%d) при добавлении", review.getFilmId()));
         }
 
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("REVIEWS")
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName(
+                        "REVIEWS")
                 .usingGeneratedKeyColumns("review_id");
         BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(review);
-        review.setReviewId(simpleJdbcInsert.executeAndReturnKey(parameterSource).longValue());
+        review.setReviewId(simpleJdbcInsert.executeAndReturnKey(parameterSource)
+                .longValue());
 
         return review;
     }
 
     public List<Review> getAll(Long filmId, Long count) {
-        String getAllReviewsQuery = "SELECT * FROM reviews WHERE (:filmId IS NULL OR film_id = :filmId) ORDER BY useful DESC LIMIT :count";
+        String getAllReviewsQuery
+                = "SELECT * FROM reviews WHERE (:filmId IS NULL OR film_id = :filmId) ORDER BY useful DESC LIMIT :count";
 
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("filmId", filmId);
@@ -85,9 +88,11 @@ public class ReviewDbStorage {
 
         SqlParameterSource paramSource = new MapSqlParameterSource(paramMap);
 
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(
+                jdbcTemplate);
         //По отзывам в ревью используем BeanPropertyRowMapper вместо маппера
-        return namedParameterJdbcTemplate.query(getAllReviewsQuery, paramSource, new BeanPropertyRowMapper<>(Review.class));
+        return namedParameterJdbcTemplate.query(getAllReviewsQuery, paramSource,
+                new BeanPropertyRowMapper<>(Review.class));
     }
 
     public Optional<Review> getById(Long reviewId) {
@@ -96,10 +101,12 @@ public class ReviewDbStorage {
         int[] argTypes = new int[]{Types.BIGINT};
 
         try { //По отзывам в ревью используем BeanPropertyRowMapper вместо маппера
-            Review review = jdbcTemplate.queryForObject(getByIdQuery, args, argTypes, BeanPropertyRowMapper.newInstance(Review.class));
+            Review review = jdbcTemplate.queryForObject(getByIdQuery, args, argTypes,
+                    BeanPropertyRowMapper.newInstance(Review.class));
             return Optional.ofNullable(review);
         } catch (EmptyResultDataAccessException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Review not found with id = %d", reviewId));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format("Review not found with id = %d", reviewId));
         }
     }
 
@@ -111,15 +118,15 @@ public class ReviewDbStorage {
             review.setFilmId(oldReview.getFilmId());
             review.setUseful(oldReview.getUseful());
 
-            String updateReviewByIdQuery = "UPDATE reviews SET content = ?, is_positive = ? WHERE review_id = ?";
-            jdbcTemplate.update(updateReviewByIdQuery,
-                    review.getContent(),
-                    review.getIsPositive(),
+            String updateReviewByIdQuery
+                    = "UPDATE reviews SET content = ?, is_positive = ? WHERE review_id = ?";
+            jdbcTemplate.update(updateReviewByIdQuery, review.getContent(), review.getIsPositive(),
                     review.getReviewId());
 
             return review;
         } else {
-            throw new NotFoundException(String.format("Неверный id отзыва при обновлении. id = %d", review.getReviewId()));
+            throw new NotFoundException(String.format("Неверный id отзыва при обновлении. id = %d",
+                    review.getReviewId()));
         }
     }
 
@@ -128,7 +135,8 @@ public class ReviewDbStorage {
         int updateCount = jdbcTemplate.update(deleteReviewByIdQuery, reviewId);
 
         if (updateCount == 0) {
-            throw new NotFoundException(String.format("Неверный id при удалении: id = %d", reviewId));
+            throw new NotFoundException(
+                    String.format("Неверный id при удалении: id = %d", reviewId));
         }
     }
 
@@ -136,38 +144,46 @@ public class ReviewDbStorage {
     //Добавить лайк
     public void addLike(Long reviewId, Long userId) {
         deleteDislike(reviewId, userId); //При лайке удаляем дизлайк
-        String addLikeQuery = "INSERT INTO review_like (review_id, user_id, IS_USEFUL) VALUES (?,?,true)";
+        String addLikeQuery
+                = "INSERT INTO review_like (review_id, user_id, IS_USEFUL) VALUES (?,?,true)";
         jdbcTemplate.update(addLikeQuery, reviewId, userId);
-        jdbcTemplate.update("UPDATE REVIEWS SET useful = ? WHERE review_id = ?", countUseful(reviewId), reviewId);
+        jdbcTemplate.update("UPDATE REVIEWS SET useful = ? WHERE review_id = ?",
+                countUseful(reviewId), reviewId);
     }
 
     //Удалить лайк
     public void deleteLike(Long reviewId, Long userId) {
-        String deleteLikeQuery = "DELETE FROM review_like WHERE review_id = ? AND user_id = ? AND IS_USEFUL = true";
+        String deleteLikeQuery
+                = "DELETE FROM review_like WHERE review_id = ? AND user_id = ? AND IS_USEFUL = true";
         jdbcTemplate.update(deleteLikeQuery, reviewId, userId);
-        jdbcTemplate.update("UPDATE REVIEWS SET useful = ? WHERE review_id = ?", countUseful(reviewId), reviewId);
+        jdbcTemplate.update("UPDATE REVIEWS SET useful = ? WHERE review_id = ?",
+                countUseful(reviewId), reviewId);
     }
 
     //Добавить дизлайк
     public void addDislike(Long reviewId, Long userId) {
         deleteLike(reviewId, userId); // При длизлайке удаляем лайк
-        String addDislikeQuery = "INSERT INTO review_like (review_id, user_id, IS_USEFUL) VALUES (?,?,false)";
+        String addDislikeQuery
+                = "INSERT INTO review_like (review_id, user_id, IS_USEFUL) VALUES (?,?,false)";
         jdbcTemplate.update(addDislikeQuery, reviewId, userId);
-        jdbcTemplate.update("UPDATE REVIEWS SET useful = ? WHERE review_id = ?", countUseful(reviewId), reviewId);
+        jdbcTemplate.update("UPDATE REVIEWS SET useful = ? WHERE review_id = ?",
+                countUseful(reviewId), reviewId);
     }
 
     //Удалить дизлайк
     public void deleteDislike(Long reviewId, Long userId) {
-        String deleteDislikeQuery = "DELETE FROM review_like WHERE review_id = ? AND user_id = ? AND IS_USEFUL = false";
+        String deleteDislikeQuery
+                = "DELETE FROM review_like WHERE review_id = ? AND user_id = ? AND IS_USEFUL = false";
         jdbcTemplate.update(deleteDislikeQuery, reviewId, userId);
-        jdbcTemplate.update("UPDATE REVIEWS SET useful = ? WHERE review_id = ?", countUseful(reviewId), reviewId);
+        jdbcTemplate.update("UPDATE REVIEWS SET useful = ? WHERE review_id = ?",
+                countUseful(reviewId), reviewId);
     }
 
     //Полезность
     public Long countUseful(Long reviewId) {
-        String countUsefulQuery = "SELECT COUNT(CASE WHEN IS_USEFUL = true THEN 1 END) - " +
-                "COUNT(CASE WHEN IS_USEFUL = false THEN 1 END) AS count_useful " +
-                "FROM review_like WHERE review_id = ?";
+        String countUsefulQuery = "SELECT COUNT(CASE WHEN IS_USEFUL = true THEN 1 END) - "
+                + "COUNT(CASE WHEN IS_USEFUL = false THEN 1 END) AS count_useful "
+                + "FROM review_like WHERE review_id = ?";
         return jdbcTemplate.queryForObject(countUsefulQuery, Long.class, reviewId);
     }
 }

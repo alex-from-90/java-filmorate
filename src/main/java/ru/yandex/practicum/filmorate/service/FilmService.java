@@ -3,8 +3,8 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 
 import java.util.List;
 
@@ -14,7 +14,6 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final LikeStorage likeStorage;
 
-
     public void addLike(Long filmId, Long userId) {
         likeStorage.addLike(filmId, userId);
     }
@@ -23,13 +22,9 @@ public class FilmService {
         likeStorage.deleteLike(filmId, userId);
     }
 
-    public List<Film> getPopular(Integer count) {
-        return likeStorage.getPopular(count);
-    }
-    //TODO
-    public List<Film> getFilmsByRating(int count, int genreId, int year) {
+    public List<Film> getPopular(int count, int genreId, int year) {
 
-        return likeStorage.getPopularFilm(count, genreId, year);
+        return likeStorage.getPopular(count, genreId, year);
     }
 
     public List<Film> getFilms() {

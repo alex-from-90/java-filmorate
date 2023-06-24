@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -48,12 +47,6 @@ public class FilmController {
         return filmService.delete(id);
     }
 
-    @GetMapping("/popular")
-    public List<Film> getPopular(@RequestParam(name = "count", defaultValue = "10") Integer count) {
-        log.info("Получен GET-запрос к эндпоинту: '/films' на получение популярных фильмов");
-        return filmService.getPopular(count);
-    }
-
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Получен PUT-запрос к эндпоинту: '/films' на добавление лайка фильму с ID={}", id);
@@ -73,17 +66,17 @@ public class FilmController {
     }
 
     @GetMapping("/search")
-    public List<Film> filmsSearch(@RequestParam String query, @RequestParam(defaultValue = "") String by) {
+    public List<Film> filmsSearch(@RequestParam String query,
+            @RequestParam(defaultValue = "") String by) {
         log.info("Получен GET-запрос к эндпоинту: '/films' на поиск по: " + query + " " + by);
         return filmService.filmSearch(query, by);
     }
 
-    //TODO new function
     @GetMapping("/popular")
-    public Collection<Film> popularFilms(@RequestParam(defaultValue = "10") Integer count,
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count,
             @RequestParam(defaultValue = "-1") Integer genreId,
             @RequestParam(defaultValue = "-1") Integer year) {
         log.info("Request best films, count = {}, genreId = {}, year = {}", count, genreId, year);
-        return filmService.getFilmsByRating(count, genreId, year);
+        return filmService.getPopular(count, genreId, year);
     }
 }

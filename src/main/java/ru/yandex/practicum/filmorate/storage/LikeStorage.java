@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,25 +10,21 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.LikeMapper;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.MpaService;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Primary
 @Component
+@Slf4j
 @RequiredArgsConstructor
-public abstract class LikeStorage {
+public class LikeStorage {
     private final JdbcTemplate jdbcTemplate;
     private final MpaService mpaService;
     private final GenreService genreService;
-
 
     public void addLike(Long filmId, Long userId) {
         String sql = "INSERT INTO film_likes (film_id, user_id) VALUES (?, ?)";
@@ -47,127 +44,110 @@ public abstract class LikeStorage {
         }
     }
 
-    public List<Film> getPopularFilm(int count, int genreId, int year) {
+    public List<Film> getPopular(int count, int genreId, int year) {
+        System.out.println(genreId);
+        System.out.println(year);
         String sql = "";
         List<Film> films = new ArrayList<>();
         if (genreId == -1 && year == -1) {
-            //log.info("Filtering populars films no parameters");
-            sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
-                    "COUNT(L.USER_ID) as RATING FROM FILMS " +
-                    "LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
-                    "GROUP BY FILMS.FILM_ID " +
-                    "ORDER BY RATING DESC LIMIT ?";
-            films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
-                    rs.getLong("film_id"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getDate("releaseDate").toLocalDate(),
-                    rs.getInt("duration"),
-                    genreService.getFilmGenresAsMap(rs.getLong("film_id")),
-                    mpaService.getMpaById(rs.getInt("rate_id")),
-                    rs.getLong("rating")
-            ), count);
+            log.info("Filtering populars films no parameters");
+            sql = "SELECT ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID , "
+                    + "COUNT(L.USER_ID) as RATING FROM FILMS "
+                    + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID " + "GROUP BY FILMS" + ".ID "
+                    + "ORDER BY RATING DESC LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> {
+                Film film = new Film();
+                Long filmId = rs.getLong("id");
+                film.setId(filmId);
+                film.setName(rs.getString("name"));
+                film.setDescription(rs.getString("description"));
+                film.setReleaseDate(rs.getDate("release_date")
+                        .toLocalDate());
+                film.setDuration(rs.getInt("duration"));
+                film.setMpa(mpaService.getMpaById(rs.getInt("rating_id")));
+                film.setGenres(genreService.getFilmGenres(filmId));
+                film.setLikes(new HashSet<>(getLikes(filmId)));
 
+                return film;
+            }, count);
         }
         if (genreId > 0 && year == -1) {
-            //log.info("Filtering populars films by genre");
-            sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
-                    "COUNT(L.USER_ID) as RATING FROM FILMS " +
-                    "LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
-                    "LEFT JOIN FILM_GENRES F on FILMS.FILM_ID = F.FILM_ID " +
-                    "WHERE F.GENRE_ID=?" +
-                    " GROUP BY FILMS.FILM_ID,  F.GENRE_ID " +
-                    "ORDER BY RATING DESC LIMIT ?";
-            films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
-                    rs.getLong("film_id"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getDate("releaseDate").toLocalDate(),
-                    rs.getInt("duration"),
-                    genreService.getFilmGenres(rs.getLong("film_id")),
-                    mpaService.getMpaById(rs.getInt("rate_id")),
-                    rs.getLong("rating")
-            ), genreId, count);
+            log.info("Filtering populars films by genre");
+            sql = "SELECT ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID, "
+                    + "COUNT(L.USER_ID) as RATING FROM FILMS "
+                    + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID "
+                    + "LEFT JOIN FILM_GENRES F on FILMS.ID = F.FILM_ID " + "WHERE F.GENRE_ID=?"
+                    + " GROUP BY FILMS.ID,  F.GENRE_ID " + "ORDER BY RATING DESC LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> {
+                Film film = new Film();
+                Long filmId = rs.getLong("id");
+                film.setId(filmId);
+                film.setName(rs.getString("name"));
+                film.setDescription(rs.getString("description"));
+                film.setReleaseDate(rs.getDate("release_date")
+                        .toLocalDate());
+                film.setDuration(rs.getInt("duration"));
+                film.setMpa(mpaService.getMpaById(rs.getInt("rating_id")));
+                film.setGenres(genreService.getFilmGenres(filmId));
+                film.setLikes(new HashSet<>(getLikes(filmId)));
+                log.info(film.toString());
+                return film;
+            }, genreId, count);
         }
         if (genreId == -1 && year > 0) {
-            //log.info("Filtering populars films by year");
-            sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
-                    "COUNT(L.USER_ID) as RATING FROM FILMS " +
-                    "LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
-                    "WHERE EXTRACT(YEAR FROM RELEASEDATE)=?" +
-                    " GROUP BY FILMS.FILM_ID" +
-                    " ORDER BY RATING DESC LIMIT ?";
-            films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
-                    rs.getLong("film_id"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getDate("releaseDate").toLocalDate(),
-                    rs.getInt("duration"),
-                    genreService.getFilmGenres(rs.getLong("film_id")),
-                    mpaService.getMpaById(rs.getInt("rate_id")),
-                    rs.getLong("rating")
-            ), year, count);
+            log.info("Filtering populars films by year");
+            sql = "SELECT ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID , "
+                    + "COUNT(L.USER_ID) as RATING FROM FILMS "
+                    + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID "
+                    + "WHERE EXTRACT(YEAR FROM RELEASE_DATE)=?" + " GROUP BY FILMS.ID"
+                    + " ORDER BY RATING DESC LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> {
+                Film film = new Film();
+                Long filmId = rs.getLong("id");
+                film.setId(filmId);
+                film.setName(rs.getString("name"));
+                film.setDescription(rs.getString("description"));
+                film.setReleaseDate(rs.getDate("release_date")
+                        .toLocalDate());
+                film.setDuration(rs.getInt("duration"));
+                film.setMpa(mpaService.getMpaById(rs.getInt("rating_id")));
+                film.setGenres(genreService.getFilmGenres(filmId));
+                film.setLikes(new HashSet<>(getLikes(filmId)));
+
+                return film;
+            }, year, count);
         }
         if (genreId > 0 && year > 0) {
-            //log.info("Filtering populars films by genre and year");
-            sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
-                    "COUNT(L.USER_ID) as RATING FROM FILMS " +
-                    "LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
-                    "LEFT JOIN FILM_GENRES F on FILMS.FILM_ID = F.FILM_ID " +
-                    "WHERE F.GENRE_ID=?" +
-                    " AND EXTRACT(YEAR FROM RELEASEDATE)=?" +
-                    " GROUP BY FILMS.FILM_ID,  F.GENRE_ID " +
-                    "ORDER BY RATING DESC LIMIT ?";
-            films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
-                    rs.getLong("film_id"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getDate("releaseDate").toLocalDate(),
-                    rs.getInt("duration"),
-                    genreService.getFilmGenres(rs.getLong("film_id")),
-                    mpaService.getMpaById(rs.getInt("rate_id")),
-                    rs.getLong("rating")
-            ), genreId, year, count);
+            log.info("Filtering populars films by genre and year");
+            sql = "SELECT ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID , "
+                    + "COUNT(L.USER_ID) as RATING FROM FILMS "
+                    + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID "
+                    + "LEFT JOIN FILM_GENRES F on FILMS.ID = F.FILM_ID " + "WHERE F.GENRE_ID=?"
+                    + " AND EXTRACT(YEAR FROM RELEASE_DATE)=?" + " GROUP BY FILMS.ID,  F.GENRE_ID "
+                    + "ORDER BY RATING DESC LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> {
+                Film film = new Film();
+                Long filmId = rs.getLong("id");
+                film.setId(filmId);
+                film.setName(rs.getString("name"));
+                film.setDescription(rs.getString("description"));
+                film.setReleaseDate(rs.getDate("release_date")
+                        .toLocalDate());
+                film.setDuration(rs.getInt("duration"));
+                film.setMpa(mpaService.getMpaById(rs.getInt("rating_id")));
+                film.setGenres(genreService.getFilmGenres(filmId));
+                film.setLikes(new HashSet<>(getLikes(filmId)));
+
+                return film;
+            }, genreId, year, count);
         }
         if (genreId < -1 && year < -1) {
-            throw new ValidationException(String.format("Incorrect parameters for filtering populars - films" +
-                    " genreid = %d and year = %d.", genreId, year));
+            throw new ValidationException(String.format(
+                    "Incorrect parameters for filtering populars - films"
+                            + " genreid = %d and year = %d.", genreId, year));
         }
 
         return films;
-    }
-
-    public List<Film> getPopular(long count) {
-        //@formatter:off
-        String getPopularQuery =
-                "SELECT films.*, rating_id "
-                + "FROM films LEFT JOIN film_likes ON films.id = film_likes.film_id "
-                + "GROUP BY films.id ORDER BY COUNT(film_likes.user_id) DESC LIMIT ?";
-        //@formatter:on
-
-        return jdbcTemplate.query(getPopularQuery, (rs, rowNum) -> {
-            Long filmId = rs.getLong("id");
-            String filmName = rs.getString("name");
-            String filmDescription = rs.getString("description");
-            LocalDate releaseDate = rs.getDate("release_date")
-                    .toLocalDate();
-            Integer duration = rs.getInt("duration");
-            Mpa mpa = mpaService.getMpaById(rs.getInt("rating_id"));
-            Set<Genre> genres = genreService.getFilmGenres(filmId);
-            Set<Long> likes = new HashSet<>(getLikes(filmId));
-
-            Film film = new Film();
-            film.setId(filmId);
-            film.setName(filmName);
-            film.setDescription(filmDescription);
-            film.setReleaseDate(releaseDate);
-            film.setDuration(duration);
-            film.setMpa(mpa);
-            film.setGenres(genres);
-            film.setLikes(likes);
-
-            return film;
-        }, count);
     }
 
     public List<Long> getLikes(Long filmId) {

@@ -34,7 +34,8 @@ public class DirectorStorage {
         try {
             return jdbcTemplate.queryForObject(sql, directorMapper, directorId);
         } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Режиссер с ID=" + directorId + " не найден!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Режиссер с ID=" + directorId + " не найден!");
         }
     }
 
@@ -44,16 +45,19 @@ public class DirectorStorage {
     }
 
     public Director createDirector(Director director) {
-        if (director.getName().isBlank() || director.getName().isEmpty()) {
+        if (director.getName()
+                .isBlank() || director.getName()
+                .isEmpty()) {
             throw new ValidationException("Имя не может быть пустым");
         }
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("directors")
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName(
+                        "directors")
                 .usingGeneratedKeyColumns("id");
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", director.getName());
-        int generatedId = simpleJdbcInsert.executeAndReturnKey(parameters).intValue();
+        int generatedId = simpleJdbcInsert.executeAndReturnKey(parameters)
+                .intValue();
         director.setId(generatedId);
 
         return director;
@@ -65,21 +69,23 @@ public class DirectorStorage {
 
         if (film.getDirectors() != null) {
             for (Director director : film.getDirectors()) {
-                jdbcTemplate.update("INSERT INTO films_directors (film_id, director_id) VALUES (?, ?)",
+                jdbcTemplate.update(
+                        "INSERT INTO films_directors (film_id, director_id) VALUES (?, ?)",
                         film.getId(), director.getId());
             }
         }
     }
 
     public List<Director> getFilmDirectors(long filmId) {
-        String sql = "SELECT * FROM films_directors" +
-                " INNER JOIN directors ON director_id = id WHERE film_id = ?";
+        String sql = "SELECT * FROM films_directors"
+                + " INNER JOIN directors ON director_id = id WHERE film_id = ?";
         return jdbcTemplate.query(sql, directorMapper, filmId);
     }
 
     public Director updateDirector(Director director) {
         String deleteGenresQuery = "UPDATE directors SET name = ? WHERE id = ?";
-        int updatedDirector = jdbcTemplate.update(deleteGenresQuery, director.getName(), director.getId());
+        int updatedDirector = jdbcTemplate.update(deleteGenresQuery, director.getName(),
+                director.getId());
         if (updatedDirector == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Режиссер с ID = " + director.getId() + " не найден");

@@ -62,7 +62,8 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new ValidationException("Передан пустой ID!");
         }
         if (!films.containsKey(filmId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм с ID=" + filmId + " не найден!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Фильм с ID=" + filmId + " не найден!");
         }
         return films.remove(filmId);
     }
