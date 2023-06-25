@@ -18,19 +18,14 @@ public class FeedService {
 
     public List<Feed> getFeedByUserId(long userId) {
 
-        User user = userStorage.getUserById(userId);
+        userStorage.getUserById(userId);
 
         return feedStorage.getFeedByUserId(userId);
     }
 
     public void createFeed(long userId, long entityId, String eventType, String operation) {
 
-            Feed feed = new Feed();
-            feed.setTimestamp(Instant.now().toEpochMilli());
-            feed.setUserId(userId);
-            feed.setEventType(eventType);
-            feed.setOperation(operation);
-            feed.setEntityId(entityId);
+            Feed feed = feedStorage.createFeed(userId, entityId, eventType, operation);
 
             feedStorage.addFeed(feed);
     }

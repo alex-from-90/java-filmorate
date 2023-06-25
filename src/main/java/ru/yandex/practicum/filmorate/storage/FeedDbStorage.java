@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.mapper.FeedMapper;
 import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.storage.interfaces.FeedStorage;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,5 +46,17 @@ public class FeedDbStorage implements FeedStorage {
 
             feed.setEventId(feedId);
         }
+    }
+
+    public Feed createFeed(long userId, long entityId, String eventType, String operation) {
+
+        Feed feed = new Feed();
+        feed.setTimestamp(Instant.now().toEpochMilli());
+        feed.setUserId(userId);
+        feed.setEventType(eventType);
+        feed.setOperation(operation);
+        feed.setEntityId(entityId);
+
+        return feed;
     }
 }
