@@ -7,11 +7,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.LikeMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.MpaService;
+import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,6 +27,7 @@ public class LikeStorage {
     private final JdbcTemplate jdbcTemplate;
     private final MpaService mpaService;
     private final GenreService genreService;
+    private final UserStorage userService;
 
     public void addLike(Long filmId, Long userId) {
         String sql = "INSERT INTO film_likes (film_id, user_id) VALUES (?, ?)";
@@ -153,5 +156,36 @@ public class LikeStorage {
     public List<Long> getLikes(Long filmId) {
         String sql = "SELECT user_id FROM film_likes WHERE film_id = ?";
         return jdbcTemplate.query(sql, new LikeMapper(), filmId);
+    }
+
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        if (userService.getUserById(userId) == null)
+            throw new NotFoundException("User not " + "found");
+        if (userService.getUserById(friendId) == null)
+            throw new NotFoundException("User not " + "found");
+        List<Film> films;
+        String sql = "SELECT *" + "FROM films AS f "
+                + "LEFT JOIN (SELECT film_id, COUNT(film_id) AS count_like FROM film_likes GROUP BY film_id) "
+                + "ON (f.ID = film_Id)" + "RIGHT JOIN film_likes AS l1 ON f.id = l1.film_id "
+                + "RIGHT JOIN film_likes AS l2 ON l1.film_id = l2.film_id "
+                + "WHERE l1.user_id = ? AND l2.user_id = ? " + "ORDER BY count_like DESC;";
+
+        films = jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Film film = new Film();
+            Long filmId = rs.getLong("id");
+            film.setId(filmId);
+            film.setName(rs.getString("name"));
+            film.setDescription(rs.getString("description"));
+            film.setReleaseDate(rs.getDate("release_date")
+                    .toLocalDate());
+            film.setDuration(rs.getInt("duration"));
+            film.setMpa(mpaService.getMpaById(rs.getInt("rating_id")));
+            film.setGenres(genreService.getFilmGenres(filmId));
+            film.setLikes(new HashSet<>(getLikes(filmId)));
+
+            return film;
+        }, userId, friendId);
+
+        return films;
     }
 }

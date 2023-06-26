@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -80,5 +81,11 @@ public class FilmController {
             @RequestParam(defaultValue = "-1") Integer year) {
         log.info("Request best films, count = {}, genreId = {}, year = {}", count, genreId, year);
         return filmService.getPopular(count, genreId, year);
+    }
+
+    @GetMapping("/common")
+    public Collection<Film> commonFilms(@RequestParam Long userId, Long friendId) {
+        log.info("Request common films of users with id {} and id {}", userId, friendId);
+        return filmService.getCommonFilms(userId, friendId);
     }
 }
