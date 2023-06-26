@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
@@ -16,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmController {
     private final FilmService filmService;
+    private final FeedService feedService;
 
     @GetMapping
     public List<Film> getFilms() {
@@ -48,12 +50,6 @@ public class FilmController {
         return filmService.delete(id);
     }
 
-    @GetMapping("/popular")
-    public List<Film> getPopular(@RequestParam(name = "count", defaultValue = "10") Integer count) {
-        log.info("Получен GET-запрос к эндпоинту: '/films' на получение популярных фильмов");
-        return filmService.getPopular(count);
-    }
-
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Получен PUT-запрос к эндпоинту: '/films' на добавление лайка фильму с ID={}", id);
@@ -76,5 +72,21 @@ public class FilmController {
     public Collection<Film> commonFilms(@RequestParam Long userId, Long friendId) {
         log.info("Request common films of users with id {} and id {}", userId, friendId);
         return filmService.getCommonFilms(userId, friendId);
+    }
+}
+
+    @GetMapping("/search")
+    public List<Film> filmsSearch(@RequestParam String query,
+            @RequestParam(defaultValue = "") String by) {
+        log.info("Получен GET-запрос к эндпоинту: '/films' на поиск по: " + query + " " + by);
+        return filmService.filmSearch(query, by);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count,
+            @RequestParam(defaultValue = "-1") Integer genreId,
+            @RequestParam(defaultValue = "-1") Integer year) {
+        log.info("Request best films, count = {}, genreId = {}, year = {}", count, genreId, year);
+        return filmService.getPopular(count, genreId, year);
     }
 }

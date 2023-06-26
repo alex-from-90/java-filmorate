@@ -13,17 +13,21 @@ import java.util.List;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final LikeStorage likeStorage;
+    private final FeedService feedService;
 
     public void addLike(Long filmId, Long userId) {
         likeStorage.addLike(filmId, userId);
+        feedService.createFeed(userId, filmId, "LIKE", "ADD");
     }
 
     public void deleteLike(Long filmId, Long userId) {
         likeStorage.deleteLike(filmId, userId);
+        feedService.createFeed(userId, filmId, "LIKE", "REMOVE");
     }
 
-    public List<Film> getPopular(Integer count) {
-        return likeStorage.getPopular(count);
+    public List<Film> getPopular(int count, int genreId, int year) {
+
+        return likeStorage.getPopular(count, genreId, year);
     }
 
     public List<Film> getFilms() {

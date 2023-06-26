@@ -114,31 +114,6 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> filmsSearch(String query, String by) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        for (String s : by.split(",")) {
-            params.addValue(s, "%" + query + "%");
-        }
-
-        String sqlFilm = " ";
-        if (params.getValues().size() == 2) sqlFilm = "OR FILMS.NAME ILIKE :title";
-
-        List<FilmColumn> filmColumns = namedParameterJdbcTemplate.query(
-                "SELECT FILMS.*, COUNT(fl.FILM_ID) FROM FILMS LEFT JOIN FILM_LIKES fl on FILMS.ID = fl.FILM_ID " +
-                        (params.getValues().containsKey("director") ?
-                                " WHERE FILMS.ID IN (SELECT FILM_ID FROM FILMS_DIRECTORS LEFT JOIN DIRECTORS D on D.ID = " +
-                                        " FILMS_DIRECTORS.DIRECTOR_ID WHERE D.NAME ILIKE :director) " + sqlFilm :
-                                " WHERE FILMS.NAME ILIKE :title") +
-                        " GROUP BY fl.FILM_ID ORDER BY COUNT(fl.FILM_ID) desc",
-                    params,
-                    new FilmMapper()
-            );
-        return filmColumns.stream()
-                .map(this::fromColumnsToDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public List<Film> getRecommendations(Long id) {
         String sql = "SELECT f.* FROM film_likes fl JOIN films f ON f.id = fl.film_id "
                 + "WHERE fl.user_id = (SELECT t2.user_id "
@@ -182,6 +157,31 @@ public class FilmDbStorage implements FilmStorage {
             default:
                 return new ArrayList<>();
         }
+    }
+
+    @Override
+    public List<Film> filmsSearch(String query, String by) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        for (String s : by.split(",")) {
+            params.addValue(s, "%" + query + "%");
+        }
+
+        String sqlFilm = " ";
+        if (params.getValues()
+                .size() == 2) sqlFilm = "OR FILMS.NAME ILIKE :title";
+
+        List<FilmColumn> filmColumns = namedParameterJdbcTemplate.query(
+                "SELECT FILMS.*, COUNT(fl.FILM_ID) FROM FILMS LEFT JOIN FILM_LIKES fl on FILMS.ID = fl.FILM_ID "
+                        + (params.getValues()
+                        .containsKey("director") ?
+                        " WHERE FILMS.ID IN (SELECT FILM_ID FROM FILMS_DIRECTORS LEFT JOIN DIRECTORS D on D.ID = "
+                                + " FILMS_DIRECTORS.DIRECTOR_ID WHERE D.NAME ILIKE :director) "
+                                + sqlFilm : " WHERE FILMS.NAME ILIKE :title")
+                        + " GROUP BY fl.FILM_ID ORDER BY COUNT(fl.FILM_ID) desc", params,
+                new FilmMapper());
+        return filmColumns.stream()
+                .map(this::fromColumnsToDto)
+                .collect(Collectors.toList());
     }
 
     private Film fromColumnsToDto(FilmColumn filmColumn) {
