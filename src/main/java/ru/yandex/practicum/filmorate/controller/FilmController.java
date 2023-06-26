@@ -73,7 +73,6 @@ public class FilmController {
         log.info("Request common films of users with id {} and id {}", userId, friendId);
         return filmService.getCommonFilms(userId, friendId);
     }
-}
 
     @GetMapping("/search")
     public List<Film> filmsSearch(@RequestParam String query,
