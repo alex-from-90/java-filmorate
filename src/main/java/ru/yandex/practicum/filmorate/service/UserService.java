@@ -18,7 +18,6 @@ public class UserService {
     private final FilmStorage filmStorage;
     private final FeedService feedService;
 
-
     /**
      * Добавляет друга для пользователя с указанным ID и друга с указанным ID.
      */

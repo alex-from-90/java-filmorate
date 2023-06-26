@@ -23,8 +23,8 @@ public class FeedService {
 
     public void createFeed(long userId, long entityId, String eventType, String operation) {
 
-            Feed feed = feedStorage.createFeed(userId, entityId, eventType, operation);
+        Feed feed = feedStorage.createFeed(userId, entityId, eventType, operation);
 
-            feedStorage.addFeed(feed);
+        feedStorage.addFeed(feed);
     }
 }

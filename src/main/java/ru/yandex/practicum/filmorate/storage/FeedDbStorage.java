@@ -22,8 +22,7 @@ public class FeedDbStorage implements FeedStorage {
     public List<Feed> getFeedByUserId(long id) {
 
         String sql = "SELECT event_id, timestamp, user_id, event_type, operation, entity_id FROM "
-                + "feeds "
-                + "WHERE user_id = ?";
+                + "feeds " + "WHERE user_id = ?";
 
         return jdbcTemplate.query(sql, new FeedMapper(), id);
     }
@@ -31,8 +30,7 @@ public class FeedDbStorage implements FeedStorage {
     public void addFeed(Feed feed) {
 
         if (feed.getUserId() > 0 && feed.getEntityId() > 0) {
-            SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate)
-                    .withTableName("feeds")
+            SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("feeds")
                     .usingGeneratedKeyColumns("event_id");
 
             Map<String, Object> values = new HashMap<>();
@@ -51,7 +49,8 @@ public class FeedDbStorage implements FeedStorage {
     public Feed createFeed(long userId, long entityId, String eventType, String operation) {
 
         Feed feed = new Feed();
-        feed.setTimestamp(Instant.now().toEpochMilli());
+        feed.setTimestamp(Instant.now()
+                .toEpochMilli());
         feed.setUserId(userId);
         feed.setEventType(eventType);
         feed.setOperation(operation);

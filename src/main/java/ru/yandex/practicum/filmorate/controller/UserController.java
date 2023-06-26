@@ -68,9 +68,8 @@ public class UserController {
 
     @GetMapping("/{id}/feed")
     public List<Feed> getFeedByUserId(@PathVariable Long id) {
-        log.info(
-                "Получен GET-запрос к эндпоинту: '/users/id/feed' на получения списка событий "
-                        + "пользователя с ID={}", id);
+        log.info("Получен GET-запрос к эндпоинту: '/users/id/feed' на получения списка событий "
+                + "пользователя с ID={}", id);
         return feedService.getFeedByUserId(id);
     }
 

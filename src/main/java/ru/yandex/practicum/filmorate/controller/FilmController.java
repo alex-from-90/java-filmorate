@@ -79,13 +79,14 @@ public class FilmController {
     public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count,
             @RequestParam(defaultValue = "-1") Integer genreId,
             @RequestParam(defaultValue = "-1") Integer year) {
-        log.info("Request best films, count = {}, genreId = {}, year = {}", count, genreId, year);
+        log.info("Запрос лучших фильмов, count = {}, genreId = {}, year = {}", count, genreId,
+                year);
         return filmService.getPopular(count, genreId, year);
     }
 
     @GetMapping("/common")
     public Collection<Film> commonFilms(@RequestParam Long userId, Long friendId) {
-        log.info("Request common films of users with id {} and id {}", userId, friendId);
+        log.info("Запрос общих фильмов пользователей с id {} и id {}", userId, friendId);
         return filmService.getCommonFilms(userId, friendId);
     }
 }
