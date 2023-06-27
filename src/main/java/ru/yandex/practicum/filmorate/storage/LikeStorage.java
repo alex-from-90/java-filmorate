@@ -171,13 +171,10 @@ public class LikeStorage {
             throw new NotFoundException("Друг пользователя не найден!");
         List<Film> films;
         String sql = "SELECT *" + "FROM films AS f "
-                + "LEFT JOIN (SELECT film_id, COUNT(film_id) AS count_like "
-                + "FROM film_likes GROUP BY film_id) "
-                + "ON (f.ID = film_Id)"
-                + "RIGHT JOIN film_likes AS l1 ON f.id = l1.film_id "
-                + "RIGHT JOIN film_likes AS l2 ON l1.film_id = l2.film_id "
-                + "WHERE l1.user_id = ? AND l2.user_id = ? "
-                + "ORDER BY count_like DESC;";
+                  + "JOIN film_likes AS LIKES_FIRST_USER ON f.id = LIKES_FIRST_USER.film_id "
+                  + "JOIN film_likes AS LIKES_SECOND_USER ON LIKES_FIRST_USER.film_id = "
+                  + "LIKES_SECOND_USER.film_id "
+                  + "WHERE LIKES_FIRST_USER.user_id = ? AND LIKES_SECOND_USER.user_id = ? ";
 
         films = jdbcTemplate.query(sql, (rs, rowNum) -> {
             Film film = new Film();
