@@ -27,10 +27,7 @@ public class ReviewService {
     public Review add(Review review) {
         Review addedReview = reviewStorage.add(review);
 
-        feedService.createFeed(addedReview.getUserId(),
-                addedReview.getReviewId(),
-                "REVIEW",
-                "ADD");
+        feedService.createFeed(addedReview.getUserId(), addedReview.getReviewId(), "REVIEW", "ADD");
         return addedReview;
     }
 
@@ -38,9 +35,7 @@ public class ReviewService {
     public Review updateReview(Review review) {
         Review addedReview = reviewStorage.update(review);
 
-        feedService.createFeed(addedReview.getUserId(),
-                addedReview.getReviewId(),
-                "REVIEW",
+        feedService.createFeed(addedReview.getUserId(), addedReview.getReviewId(), "REVIEW",
                 "UPDATE");
 
         return addedReview;
@@ -50,10 +45,7 @@ public class ReviewService {
     public void deleteById(Long reviewId) {
         Review review = getReviewById(reviewId);
 
-        feedService.createFeed(review.getUserId(),
-                review.getReviewId(),
-                "REVIEW",
-                "REMOVE");
+        feedService.createFeed(review.getUserId(), review.getReviewId(), "REVIEW", "REMOVE");
 
         reviewStorage.deleteById(reviewId);
     }

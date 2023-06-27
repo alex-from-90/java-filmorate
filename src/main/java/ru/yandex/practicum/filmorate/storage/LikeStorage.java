@@ -7,11 +7,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.LikeMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.MpaService;
+import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,6 +27,7 @@ public class LikeStorage {
     private final JdbcTemplate jdbcTemplate;
     private final MpaService mpaService;
     private final GenreService genreService;
+    private final UserStorage userService;
 
     public void addLike(Long filmId, Long userId) {
         String sql = "INSERT INTO film_likes (film_id, user_id) VALUES (?, ?)";
@@ -50,10 +53,11 @@ public class LikeStorage {
         String sql = "";
         List<Film> films = new ArrayList<>();
         if (genreId == -1 && year == -1) {
-            log.info("Filtering populars films no parameters");
+            log.info("Фильтрация популярных фильмов без параметров");
             sql = "SELECT ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID , "
                     + "COUNT(L.USER_ID) as RATING FROM FILMS "
-                    + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID " + "GROUP BY FILMS" + ".ID "
+                    + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID "
+                    + "GROUP BY FILMS" + ".ID "
                     + "ORDER BY RATING DESC LIMIT ?";
             films = jdbcTemplate.query(sql, (rs, rowNum) -> {
                 Film film = new Film();
@@ -72,12 +76,14 @@ public class LikeStorage {
             }, count);
         }
         if (genreId > 0 && year == -1) {
-            log.info("Filtering populars films by genre");
+            log.info("Фильтрация популярных фильмов по жанрам");
             sql = "SELECT ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID, "
                     + "COUNT(L.USER_ID) as RATING FROM FILMS "
                     + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID "
-                    + "LEFT JOIN FILM_GENRES F on FILMS.ID = F.FILM_ID " + "WHERE F.GENRE_ID=?"
-                    + " GROUP BY FILMS.ID,  F.GENRE_ID " + "ORDER BY RATING DESC LIMIT ?";
+                    + "LEFT JOIN FILM_GENRES F on FILMS.ID = F.FILM_ID "
+                    + "WHERE F.GENRE_ID=?"
+                    + " GROUP BY FILMS.ID,  F.GENRE_ID "
+                    + "ORDER BY RATING DESC LIMIT ?";
             films = jdbcTemplate.query(sql, (rs, rowNum) -> {
                 Film film = new Film();
                 Long filmId = rs.getLong("id");
@@ -95,11 +101,12 @@ public class LikeStorage {
             }, genreId, count);
         }
         if (genreId == -1 && year > 0) {
-            log.info("Filtering populars films by year");
+            log.info("Фильтрация популярных фильмов по годам");
             sql = "SELECT ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID , "
                     + "COUNT(L.USER_ID) as RATING FROM FILMS "
                     + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID "
-                    + "WHERE EXTRACT(YEAR FROM RELEASE_DATE)=?" + " GROUP BY FILMS.ID"
+                    + "WHERE EXTRACT(YEAR FROM RELEASE_DATE)=?"
+                    + " GROUP BY FILMS.ID"
                     + " ORDER BY RATING DESC LIMIT ?";
             films = jdbcTemplate.query(sql, (rs, rowNum) -> {
                 Film film = new Film();
@@ -118,12 +125,14 @@ public class LikeStorage {
             }, year, count);
         }
         if (genreId > 0 && year > 0) {
-            log.info("Filtering populars films by genre and year");
+            log.info("Фильтрация популярных фильмов по жанрам и годам");
             sql = "SELECT ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID , "
                     + "COUNT(L.USER_ID) as RATING FROM FILMS "
                     + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID "
-                    + "LEFT JOIN FILM_GENRES F on FILMS.ID = F.FILM_ID " + "WHERE F.GENRE_ID=?"
-                    + " AND EXTRACT(YEAR FROM RELEASE_DATE)=?" + " GROUP BY FILMS.ID,  F.GENRE_ID "
+                    + "LEFT JOIN FILM_GENRES F on FILMS.ID = F.FILM_ID "
+                    + "WHERE F.GENRE_ID=?"
+                    + " AND EXTRACT(YEAR FROM RELEASE_DATE)=?"
+                    + " GROUP BY FILMS.ID,  F.GENRE_ID "
                     + "ORDER BY RATING DESC LIMIT ?";
             films = jdbcTemplate.query(sql, (rs, rowNum) -> {
                 Film film = new Film();
@@ -143,7 +152,7 @@ public class LikeStorage {
         }
         if (genreId < -1 && year < -1) {
             throw new ValidationException(String.format(
-                    "Incorrect parameters for filtering populars - films"
+                    "Неверные параметры фильтрации популярных фильмов"
                             + " genreid = %d and year = %d.", genreId, year));
         }
 
@@ -153,5 +162,34 @@ public class LikeStorage {
     public List<Long> getLikes(Long filmId) {
         String sql = "SELECT user_id FROM film_likes WHERE film_id = ?";
         return jdbcTemplate.query(sql, new LikeMapper(), filmId);
+    }
+
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        if (userService.getUserById(userId) == null)
+            throw new NotFoundException("Друг пользователя не найден!");
+        List<Film> films;
+        String sql = "SELECT *" + "FROM films AS f "
+                  + "JOIN film_likes AS LIKES_FIRST_USER ON f.id = LIKES_FIRST_USER.film_id "
+                  + "JOIN film_likes AS LIKES_SECOND_USER ON LIKES_FIRST_USER.film_id = "
+                  + "LIKES_SECOND_USER.film_id "
+                  + "WHERE LIKES_FIRST_USER.user_id = ? AND LIKES_SECOND_USER.user_id = ? ";
+
+        films = jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Film film = new Film();
+            Long filmId = rs.getLong("id");
+            film.setId(filmId);
+            film.setName(rs.getString("name"));
+            film.setDescription(rs.getString("description"));
+            film.setReleaseDate(rs.getDate("release_date")
+                    .toLocalDate());
+            film.setDuration(rs.getInt("duration"));
+            film.setMpa(mpaService.getMpaById(rs.getInt("rating_id")));
+            film.setGenres(genreService.getFilmGenres(filmId));
+            film.setLikes(new HashSet<>(getLikes(filmId)));
+
+            return film;
+        }, userId, friendId);
+
+        return films;
     }
 }
