@@ -167,8 +167,6 @@ public class LikeStorage {
     public List<Film> getCommonFilms(Long userId, Long friendId) {
         if (userService.getUserById(userId) == null)
             throw new NotFoundException("Друг пользователя не найден!");
-        if (userService.getUserById(friendId) == null)
-            throw new NotFoundException("Друг пользователя не найден!");
         List<Film> films;
         String sql = "SELECT *" + "FROM films AS f "
                   + "JOIN film_likes AS LIKES_FIRST_USER ON f.id = LIKES_FIRST_USER.film_id "
