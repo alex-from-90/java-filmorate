@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.ReviewService;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmController {
     private final FilmService filmService;
+    private final ReviewService reviewService;
 
     @GetMapping
     public List<Film> getFilms() {
@@ -23,15 +25,13 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        log.info("Получен POST-запрос к эндпоинту: '/films' на добавление фильма с ID={}",
-                film.getId());
+        log.info("Получен POST-запрос к эндпоинту: '/films' на добавление фильма с ID={}", film.getId());
         return filmService.create(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        log.info("Получен PUT-запрос к эндпоинту: '/films' на обновление фильма с ID={}",
-                film.getId());
+        log.info("Получен PUT-запрос к эндпоинту: '/films' на обновление фильма с ID={}", film.getId());
         return filmService.update(film);
     }
 
@@ -46,13 +46,11 @@ public class FilmController {
         log.info("Получен DELETE-запрос к эндпоинту: '/films' на удаление фильма с ID={}", id);
         return filmService.delete(id);
     }
-
     @GetMapping("/popular")
     public List<Film> getPopular(@RequestParam(name = "count", defaultValue = "10") Integer count) {
         log.info("Получен GET-запрос к эндпоинту: '/films' на получение популярных фильмов");
         return filmService.getPopular(count);
     }
-
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Получен PUT-запрос к эндпоинту: '/films' на добавление лайка фильму с ID={}", id);
@@ -61,13 +59,7 @@ public class FilmController {
 
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
-        log.info("Получен DELETE-запрос к эндпоинту: '/films' на удаление лайка у фильма с ID={}",
-                id);
+        log.info("Получен DELETE-запрос к эндпоинту: '/films' на удаление лайка у фильма с ID={}", id);
         filmService.deleteLike(id, userId);
-    }
-
-    @GetMapping("/director/{directorId}")
-    public List<Film> getDirectorFilms(@PathVariable int directorId, @RequestParam String sortBy) {
-        return filmService.getDirectorFilms(directorId, sortBy);
     }
 }

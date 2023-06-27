@@ -16,17 +16,20 @@ import java.util.Collection;
 public class ReviewController {
     private final ReviewService reviewService;
 
+
     @PostMapping
-    public Review addReview(@Valid @RequestBody Review review) {
+    public Review addReview( @Valid @RequestBody Review review ) {
         log.info("Получен POST запрос на добавление отзыва");
         return reviewService.add(review);
     }
 
+
     @PutMapping
-    public Review updateReview(@Valid @RequestBody Review review) {
+    public Review updateReview( @Valid @RequestBody Review review ) {
         log.info("Получен PUT запрос на обновление отзыва");
         return reviewService.updateReview(review);
     }
+
 
     @DeleteMapping("/{id}")
 
@@ -35,11 +38,13 @@ public class ReviewController {
         reviewService.deleteById(id);
     }
 
+
     @GetMapping("/{id}")
     public Review getReviewById(@PathVariable Long id) {
         log.info("Получен GET запрос на получение отзыва с id = {}", id);
         return reviewService.getReviewById(id);
     }
+
 
     @GetMapping
     public Collection<Review> findAll(@RequestParam(required = false) Long filmId,
@@ -59,13 +64,11 @@ public class ReviewController {
         log.info("Получен DELETE-запрос к эндпоинту: '/reviews' на удаление лайка у фильма с ID={}", id);
         reviewService.deleteLike(id, userId);
     }
-
     @PutMapping("/{id}/dislike/{userId}")
     public void addUserDislike(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Получен PUT запрос на добавлени дизлайка id = {} от пользователя ID = {}", id, userId);
         reviewService.addUserDislike(id, userId);
     }
-
     @DeleteMapping("/{id}/dislike/{userId}")
     public void deleteUserDislike(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Получен DELETE запрос на удаление дизлайка id = {} от пользователя ID = {}", id, userId);
