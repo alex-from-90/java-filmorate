@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
@@ -17,7 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmController {
     private final FilmService filmService;
-    private final FeedService feedService;
 
     @GetMapping
     public List<Film> getFilms() {
@@ -70,15 +68,15 @@ public class FilmController {
 
     @GetMapping("/search")
     public List<Film> filmsSearch(@RequestParam String query,
-            @RequestParam(defaultValue = "") String by) {
+                                  @RequestParam(defaultValue = "") String by) {
         log.info("Получен GET-запрос к эндпоинту: '/films' на поиск по: " + query + " " + by);
         return filmService.filmSearch(query, by);
     }
 
     @GetMapping("/popular")
     public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count,
-            @RequestParam(defaultValue = "-1") Integer genreId,
-            @RequestParam(defaultValue = "-1") Integer year) {
+                                      @RequestParam(defaultValue = "-1") Integer genreId,
+                                      @RequestParam(defaultValue = "-1") Integer year) {
         log.info("Запрос лучших фильмов, count = {}, genreId = {}, year = {}", count, genreId,
                 year);
         return filmService.getPopular(count, genreId, year);

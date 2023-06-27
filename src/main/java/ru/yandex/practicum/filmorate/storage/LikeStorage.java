@@ -50,7 +50,7 @@ public class LikeStorage {
     public List<Film> getPopular(int count, int genreId, int year) {
         System.out.println(genreId);
         System.out.println(year);
-        String sql = "";
+        String sql;
         List<Film> films = new ArrayList<>();
         if (genreId == -1 && year == -1) {
             log.info("Фильтрация популярных фильмов без параметров");
@@ -169,10 +169,10 @@ public class LikeStorage {
             throw new NotFoundException("Друг пользователя не найден!");
         List<Film> films;
         String sql = "SELECT *" + "FROM films AS f "
-                  + "JOIN film_likes AS LIKES_FIRST_USER ON f.id = LIKES_FIRST_USER.film_id "
-                  + "JOIN film_likes AS LIKES_SECOND_USER ON LIKES_FIRST_USER.film_id = "
-                  + "LIKES_SECOND_USER.film_id "
-                  + "WHERE LIKES_FIRST_USER.user_id = ? AND LIKES_SECOND_USER.user_id = ? ";
+                + "JOIN film_likes AS LIKES_FIRST_USER ON f.id = LIKES_FIRST_USER.film_id "
+                + "JOIN film_likes AS LIKES_SECOND_USER ON LIKES_FIRST_USER.film_id = "
+                + "LIKES_SECOND_USER.film_id "
+                + "WHERE LIKES_FIRST_USER.user_id = ? AND LIKES_SECOND_USER.user_id = ? ";
 
         films = jdbcTemplate.query(sql, (rs, rowNum) -> {
             Film film = new Film();

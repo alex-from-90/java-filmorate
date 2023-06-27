@@ -21,9 +21,7 @@ public class GenreStorage {
     GenreMapper genreMapper = new GenreMapper();
 
     public List<Genre> getGenres() {
-        //@formatter:off
         String sql = "SELECT * FROM genres ORDER BY id";
-        //@formatter:on
         return jdbcTemplate.query(sql, genreMapper);
     }
 
@@ -54,10 +52,8 @@ public class GenreStorage {
     }
 
     public List<Genre> getFilmGenres(Long filmId) {
-        //@formatter:off
         String sql = "SELECT * FROM film_genres"
                 + " INNER JOIN genres ON genre_id = id WHERE film_id = ?";
-        //@formatter:on
         return jdbcTemplate.query(sql,
                 (rs, rowNum) -> new Genre(rs.getInt("genre_id"), rs.getString("name")), filmId);
     }

@@ -26,9 +26,7 @@ public class FriendStorage {
         User user = userStorage.getUserById(userId);
         User friend = userStorage.getUserById(friendId);
         if (user != null && friend != null) {
-            //@formatter:off
             String sql = "INSERT INTO friends (user_id, friend_id, status) VALUES (?, ?, ?)";
-            //@formatter:on
             jdbcTemplate.update(sql, userId, friendId, true);
         } else {
             // Один или оба пользователей не найдены
@@ -38,19 +36,15 @@ public class FriendStorage {
     }
 
     public void deleteFriend(Long userId, Long friendId) {
-        //@formatter:off
         String sql = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
-        //@formatter:on
         jdbcTemplate.update(sql, userId, friendId);
     }
 
     public List<User> getFriends(Long userId) {
         User user = userStorage.getUserById(userId);
         if (user != null) {
-            //@formatter:off
             String sql = "SELECT u.id, u.email, u.login, u.name, u.birthday FROM users u "
                     + "JOIN friends f ON f.friend_id = u.id WHERE f.user_id = ?";
-            //@formatter:on
             UserMapper userMapper = new UserMapper();
             return jdbcTemplate.query(sql, ps -> ps.setLong(1, userId), userMapper);
         } else {
@@ -59,12 +53,10 @@ public class FriendStorage {
     }
 
     public List<User> getCommonFriends(Long firstUserId, Long secondUserId) {
-        //@formatter:off
         String sql = "SELECT u.id, u.email, u.login, u.name, u.birthday " + "FROM friends f1 "
                 + "JOIN friends f2 ON f1.friend_id = f2.friend_id "
                 + "JOIN users u ON f1.friend_id = u.id "
                 + "WHERE f1.user_id = ? AND f2.user_id = ?";
-        //@formatter:on
         UserMapper userMapper = new UserMapper();
         return jdbcTemplate.query(sql, ps -> {
             ps.setLong(1, firstUserId);
