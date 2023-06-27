@@ -60,8 +60,7 @@ public class FriendStorage {
 
     public List<User> getCommonFriends(Long firstUserId, Long secondUserId) {
         //@formatter:off
-        String sql = "SELECT u.id, u.email, u.login, u.name, u.birthday "
-                + "FROM friends f1 "
+        String sql = "SELECT u.id, u.email, u.login, u.name, u.birthday " + "FROM friends f1 "
                 + "JOIN friends f2 ON f1.friend_id = f2.friend_id "
                 + "JOIN users u ON f1.friend_id = u.id "
                 + "WHERE f1.user_id = ? AND f2.user_id = ?";

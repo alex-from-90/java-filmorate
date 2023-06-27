@@ -16,12 +16,14 @@ public class UserService {
     private final UserStorage userStorage;
     private final FriendStorage friendStorage;
     private final FilmStorage filmStorage;
+    private final FeedService feedService;
 
     /**
      * Добавляет друга для пользователя с указанным ID и друга с указанным ID.
      */
     public void addFriend(Long userId, Long friendId) {
         friendStorage.addFriend(userId, friendId);
+        feedService.createFeed(userId, friendId, "FRIEND", "ADD");
     }
 
     /**
@@ -29,6 +31,7 @@ public class UserService {
      */
     public void deleteFriend(Long userId, Long friendId) {
         friendStorage.deleteFriend(userId, friendId);
+        feedService.createFeed(userId, friendId, "FRIEND", "REMOVE");
     }
 
     /**

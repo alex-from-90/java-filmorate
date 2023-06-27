@@ -31,19 +31,22 @@ public class DirectorController {
 
     @PostMapping
     public Director create(@Valid @RequestBody Director director) {
-        log.info("Получен POST-запрос к эндпоинту: '/directors' на добавление режиссера с ID={}", director.getId());
+        log.info("Получен POST-запрос к эндпоинту: '/directors' на добавление режиссера с ID={}",
+                director.getId());
         return directorService.createDirector(director);
     }
 
     @PutMapping
     public Director update(@Valid @RequestBody Director director) {
-        log.info("Получен PUT-запрос к эндпоинту: '/directors' на обновление режиссера с ID={}", director.getId());
+        log.info("Получен PUT-запрос к эндпоинту: '/directors' на обновление режиссера с ID={}",
+                director.getId());
         return directorService.updateDirector(director);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable int id) {
-        log.info("Получен DELETE-запрос к эндпоинту: '/directors' на удаление режиссера с ID={}", id);
+        log.info("Получен DELETE-запрос к эндпоинту: '/directors' на удаление режиссера с ID={}",
+                id);
         directorService.deleteDirector(id);
     }
 }

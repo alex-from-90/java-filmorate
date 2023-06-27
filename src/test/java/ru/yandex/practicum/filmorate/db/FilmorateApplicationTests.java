@@ -218,7 +218,7 @@ class FilmorateApplicationTests {
         filmService.addLike(createdThirdFilm.getId(), createdFirstUser.getId());
         filmService.addLike(createdThirdFilm.getId(), createdSecondUser.getId());
 
-        List<Film> listFilms = filmService.getPopular(5);
+        List<Film> listFilms = filmService.getPopular(5, -1, -1);
 
         assertThat(listFilms).hasSize(3)
                 .extracting(Film::getName)

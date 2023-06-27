@@ -9,10 +9,11 @@ import java.util.Collection;
 
 @Service
 @RequiredArgsConstructor
-
 public class ReviewService {
 
     private final ReviewDbStorage reviewStorage;
+
+    private final FeedService feedService;
 
     public void addLike(Long filmId, Long userId) {
         reviewStorage.addLike(filmId, userId);
@@ -24,22 +25,35 @@ public class ReviewService {
 
     //Добавить отзыв
     public Review add(Review review) {
-        return reviewStorage.add(review);
+        Review addedReview = reviewStorage.add(review);
+
+        feedService.createFeed(addedReview.getUserId(), addedReview.getReviewId(), "REVIEW", "ADD");
+        return addedReview;
     }
 
     //Обновить отзыв
     public Review updateReview(Review review) {
-        return reviewStorage.update(review);  // Сделать обновление события
+        Review addedReview = reviewStorage.update(review);
+
+        feedService.createFeed(addedReview.getUserId(), addedReview.getReviewId(), "REVIEW",
+                "UPDATE");
+
+        return addedReview;
     }
 
     //Удалить отзыв
     public void deleteById(Long reviewId) {
+        Review review = getReviewById(reviewId);
+
+        feedService.createFeed(review.getUserId(), review.getReviewId(), "REVIEW", "REMOVE");
+
         reviewStorage.deleteById(reviewId);
     }
 
     //Получить отзыв по ID
     public Review getReviewById(final Long id) {
-        return reviewStorage.getById(id).orElse(null);
+        return reviewStorage.getById(id)
+                .orElse(null);
     }
 
     //Получить все отзывы
