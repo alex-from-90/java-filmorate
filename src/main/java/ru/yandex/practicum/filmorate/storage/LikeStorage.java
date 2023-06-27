@@ -10,14 +10,13 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.LikeMapper;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.MpaService;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 @Primary
 @Component
@@ -28,9 +27,10 @@ public class LikeStorage {
     private final MpaService mpaService;
     private final GenreService genreService;
     private final UserStorage userService;
+    private final DirectorStorage directorStorage;
 
     public void addLike(Long filmId, Long userId) {
-        String sql = "INSERT INTO film_likes (film_id, user_id) VALUES (?, ?)";
+        String sql = "MERGE INTO film_likes (film_id, user_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, filmId, userId);
     }
 
@@ -71,6 +71,8 @@ public class LikeStorage {
                 film.setMpa(mpaService.getMpaById(rs.getInt("rating_id")));
                 film.setGenres(genreService.getFilmGenres(filmId));
                 film.setLikes(new HashSet<>(getLikes(filmId)));
+                Collection<Director> directors = directorStorage.getFilmDirectors(filmId);
+                film.getDirectors().addAll(directors);
 
                 return film;
             }, count);
@@ -96,6 +98,8 @@ public class LikeStorage {
                 film.setMpa(mpaService.getMpaById(rs.getInt("rating_id")));
                 film.setGenres(genreService.getFilmGenres(filmId));
                 film.setLikes(new HashSet<>(getLikes(filmId)));
+                Collection<Director> directors = directorStorage.getFilmDirectors(filmId);
+                film.getDirectors().addAll(directors);
                 log.info(film.toString());
                 return film;
             }, genreId, count);
@@ -120,6 +124,8 @@ public class LikeStorage {
                 film.setMpa(mpaService.getMpaById(rs.getInt("rating_id")));
                 film.setGenres(genreService.getFilmGenres(filmId));
                 film.setLikes(new HashSet<>(getLikes(filmId)));
+                Collection<Director> directors = directorStorage.getFilmDirectors(filmId);
+                film.getDirectors().addAll(directors);
 
                 return film;
             }, year, count);
@@ -146,6 +152,8 @@ public class LikeStorage {
                 film.setMpa(mpaService.getMpaById(rs.getInt("rating_id")));
                 film.setGenres(genreService.getFilmGenres(filmId));
                 film.setLikes(new HashSet<>(getLikes(filmId)));
+                Collection<Director> directors = directorStorage.getFilmDirectors(filmId);
+                film.getDirectors().addAll(directors);
 
                 return film;
             }, genreId, year, count);

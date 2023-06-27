@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.mapper.DirectorMapper;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DirectorStorage {
     private final JdbcTemplate jdbcTemplate;
-    DirectorMapper directorMapper = new DirectorMapper();
+    private final DirectorMapper directorMapper = new DirectorMapper();
 
     public List<Director> getDirectors() {
         String sql = "SELECT * FROM directors ORDER BY id";
@@ -76,7 +77,7 @@ public class DirectorStorage {
         }
     }
 
-    public List<Director> getFilmDirectors(long filmId) {
+    public Collection<Director> getFilmDirectors(long filmId) {
         String sql = "SELECT * FROM films_directors"
                 + " INNER JOIN directors ON director_id = id WHERE film_id = ?";
         return jdbcTemplate.query(sql, directorMapper, filmId);

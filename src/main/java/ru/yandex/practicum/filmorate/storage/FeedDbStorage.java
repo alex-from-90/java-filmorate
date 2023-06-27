@@ -49,8 +49,7 @@ public class FeedDbStorage implements FeedStorage {
     public Feed createFeed(long userId, long entityId, String eventType, String operation) {
 
         Feed feed = new Feed();
-        feed.setTimestamp(Instant.now()
-                .toEpochMilli());
+        feed.setTimestamp(Instant.now().toEpochMilli());
         feed.setUserId(userId);
         feed.setEventType(eventType);
         feed.setOperation(operation);
