@@ -55,6 +55,8 @@ public class FeedDbStorage implements FeedStorage {
         feed.setOperation(operation);
         feed.setEntityId(entityId);
 
+        addFeed(feed);
+
         return feed;
     }
 }
