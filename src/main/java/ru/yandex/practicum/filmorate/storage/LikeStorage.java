@@ -124,7 +124,7 @@ public class LikeStorage {
         return films;
     }
 
-    private Film createCurrentFilm (ResultSet rs) throws SQLException {
+    private Film createCurrentFilm(ResultSet rs) throws SQLException {
         Film film = new Film();
         Long filmId = rs.getLong("id");
         film.setId(filmId);
