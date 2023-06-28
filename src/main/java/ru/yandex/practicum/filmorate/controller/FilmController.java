@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.model.DirectorSortBy;
+import ru.yandex.practicum.filmorate.storage.model.FilmSearchParameters;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -69,7 +70,7 @@ public class FilmController {
 
     @GetMapping("/search")
     public List<Film> filmsSearch(@RequestParam String query,
-                                  @RequestParam(defaultValue = "") String by) {
+                                  @RequestParam List<FilmSearchParameters> by) {
         log.info("Получен GET-запрос к эндпоинту: '/films' на поиск по: " + query + " " + by);
         return filmService.filmSearch(query, by);
     }

@@ -17,6 +17,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.model.DirectorSortBy;
 import ru.yandex.practicum.filmorate.storage.model.FilmColumn;
+import ru.yandex.practicum.filmorate.storage.model.FilmSearchParameters;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -156,10 +157,10 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> filmsSearch(String query, String by) {
+    public List<Film> filmsSearch(String query, List<FilmSearchParameters> by) {
         MapSqlParameterSource params = new MapSqlParameterSource();
-        for (String s : by.split(",")) {
-            params.addValue(s, "%" + query + "%");
+        for (FilmSearchParameters s : by) {
+            params.addValue(s.name(), "%" + query + "%");
         }
 
         String sqlFilm = " ";

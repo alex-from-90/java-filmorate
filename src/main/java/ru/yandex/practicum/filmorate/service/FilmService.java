@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.model.DirectorSortBy;
+import ru.yandex.practicum.filmorate.storage.model.FilmSearchParameters;
 
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class FilmService {
         return filmStorage.getDirectorFilms(directorId, sortBy);
     }
 
-    public List<Film> filmSearch(String query, String by) {
+    public List<Film> filmSearch(String query, List<FilmSearchParameters> by) {
         return filmStorage.filmsSearch(query, by);
     }
 
