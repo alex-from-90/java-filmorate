@@ -42,7 +42,7 @@ public class ReviewController {
 
     @GetMapping
     public Collection<Review> findAll(@RequestParam(required = false) Long filmId,
-                                      @RequestParam(defaultValue = "10", required = false) Long count) {
+            @RequestParam(defaultValue = "10", required = false) Long count) {
         log.info("Получен GET запрос на получение всех отзывов , filmId = {}, count = {}",
                 filmId == null ? "all" : filmId, count);
         return reviewService.getAllReviews(filmId, count);

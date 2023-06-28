@@ -52,8 +52,7 @@ public class ReviewService {
 
     //Получить отзыв по ID
     public Review getReviewById(final Long id) {
-        return reviewStorage.getById(id)
-                .orElse(null);
+        return reviewStorage.getById(id).orElse(null);
     }
 
     //Получить все отзывы

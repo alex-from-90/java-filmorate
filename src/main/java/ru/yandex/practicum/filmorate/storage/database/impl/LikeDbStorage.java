@@ -18,7 +18,10 @@ import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 @Primary
 @Component
@@ -100,8 +103,8 @@ public class LikeDbStorage {
                     + " GROUP BY FILMS.ID,  F.GENRE_ID "
                     + "ORDER BY RATING DESC LIMIT ?";
             //@formatter:on
-            films = jdbcTemplate.query(sql, (rs, rowNum) ->
-                    createCurrentFilm(rs), genreId, year, count);
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> createCurrentFilm(rs), genreId, year,
+                    count);
         }
         if (genreId < -1 && year < -1) {
             throw new ValidationException(String.format(
@@ -140,8 +143,7 @@ public class LikeDbStorage {
         film.setId(filmId);
         film.setName(rs.getString("name"));
         film.setDescription(rs.getString("description"));
-        film.setReleaseDate(rs.getDate("release_date")
-                .toLocalDate());
+        film.setReleaseDate(rs.getDate("release_date").toLocalDate());
         film.setDuration(rs.getInt("duration"));
         film.setMpa(mpaService.getMpaById(rs.getInt("rating_id")));
         film.setGenres(genreService.getFilmGenres(filmId));

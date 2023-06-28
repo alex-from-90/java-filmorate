@@ -69,11 +69,9 @@ public class ReviewDbStorage {
         }
 
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName(
-                        "REVIEWS")
-                .usingGeneratedKeyColumns("review_id");
+                "REVIEWS").usingGeneratedKeyColumns("review_id");
         BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(review);
-        review.setReviewId(simpleJdbcInsert.executeAndReturnKey(parameterSource)
-                .longValue());
+        review.setReviewId(simpleJdbcInsert.executeAndReturnKey(parameterSource).longValue());
 
         return review;
     }

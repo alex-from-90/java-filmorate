@@ -29,18 +29,15 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User createUser(User user) {
-        if (user.getName() == null || user.getName()
-                .isEmpty()) {
+        if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
 
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName(
-                        "users")
-                .usingGeneratedKeyColumns("id");
+                "users").usingGeneratedKeyColumns("id");
 
         SqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
-        user.setId(simpleJdbcInsert.executeAndReturnKey(parameterSource)
-                .longValue());
+        user.setId(simpleJdbcInsert.executeAndReturnKey(parameterSource).longValue());
 
         log.info("Добавлен новый пользователь с ID={}", user.getId());
         return user;

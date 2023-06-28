@@ -45,8 +45,7 @@ public class Film {
 
     @JsonSetter
     public void setGenres(Set<Genre> genres) {
-        this.genres = genres.stream()
-                .sorted(Comparator.comparingInt(Genre::getId))
+        this.genres = genres.stream().sorted(Comparator.comparingInt(Genre::getId))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

@@ -46,19 +46,15 @@ public class DirectorDbStorage {
     }
 
     public Director createDirector(Director director) {
-        if (director.getName()
-                .isBlank() || director.getName()
-                .isEmpty()) {
+        if (director.getName().isBlank() || director.getName().isEmpty()) {
             throw new ValidationException("Имя не может быть пустым");
         }
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName(
-                        "directors")
-                .usingGeneratedKeyColumns("id");
+                "directors").usingGeneratedKeyColumns("id");
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", director.getName());
-        int generatedId = simpleJdbcInsert.executeAndReturnKey(parameters)
-                .intValue();
+        int generatedId = simpleJdbcInsert.executeAndReturnKey(parameters).intValue();
         director.setId(generatedId);
 
         return director;
