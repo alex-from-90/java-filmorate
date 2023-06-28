@@ -168,6 +168,7 @@ public class FilmDbStorage implements FilmStorage {
                 .size() == 2) sqlFilm = "OR FILMS.NAME ILIKE :title";
 
         List<FilmColumn> filmColumns = namedParameterJdbcTemplate.query(
+                //@formatter:off
                 "SELECT FILMS.*, COUNT(fl.FILM_ID) FROM FILMS LEFT JOIN FILM_LIKES fl on FILMS.ID = fl.FILM_ID "
                         + (params.getValues()
                         .containsKey("director") ?
@@ -176,6 +177,7 @@ public class FilmDbStorage implements FilmStorage {
                                 + sqlFilm : " WHERE FILMS.NAME ILIKE :title")
                         + " GROUP BY fl.FILM_ID ORDER BY COUNT(fl.FILM_ID) desc", params,
                 new FilmMapper());
+        //@formatter:on
         return filmColumns.stream()
                 .map(this::fromColumnsToDto)
                 .collect(Collectors.toList());

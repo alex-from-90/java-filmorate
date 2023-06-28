@@ -54,15 +54,18 @@ public class LikeDbStorage {
         List<Film> films = new ArrayList<>();
         if (genreId == -1 && year == -1) {
             log.info("Фильтрация популярных фильмов без параметров");
+            //@formatter:off
             sql = "SELECT ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID , "
                     + "COUNT(L.USER_ID) as RATING FROM FILMS "
                     + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID "
-                    + "GROUP BY FILMS" + ".ID "
+                    + "GROUP BY FILMS.ID "
                     + "ORDER BY RATING DESC LIMIT ?";
+            //@formatter:on
             films = jdbcTemplate.query(sql, (rs, rowNum) -> createCurrentFilm(rs), count);
         }
         if (genreId > 0 && year == -1) {
             log.info("Фильтрация популярных фильмов по жанрам");
+            //@formatter:off
             sql = "SELECT ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID, "
                     + "COUNT(L.USER_ID) as RATING FROM FILMS "
                     + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID "
@@ -70,20 +73,24 @@ public class LikeDbStorage {
                     + "WHERE F.GENRE_ID=?"
                     + " GROUP BY FILMS.ID,  F.GENRE_ID "
                     + "ORDER BY RATING DESC LIMIT ?";
+            //@formatter:on
             films = jdbcTemplate.query(sql, (rs, rowNum) -> createCurrentFilm(rs), genreId, count);
         }
         if (genreId == -1 && year > 0) {
             log.info("Фильтрация популярных фильмов по годам");
+            //@formatter:off
             sql = "SELECT ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID , "
                     + "COUNT(L.USER_ID) as RATING FROM FILMS "
                     + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID "
                     + "WHERE EXTRACT(YEAR FROM RELEASE_DATE)=?"
                     + " GROUP BY FILMS.ID"
                     + " ORDER BY RATING DESC LIMIT ?";
+            //@formatter:on
             films = jdbcTemplate.query(sql, (rs, rowNum) -> createCurrentFilm(rs), year, count);
         }
         if (genreId > 0 && year > 0) {
             log.info("Фильтрация популярных фильмов по жанрам и годам");
+            //@formatter:off
             sql = "SELECT ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID , "
                     + "COUNT(L.USER_ID) as RATING FROM FILMS "
                     + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID "
@@ -92,6 +99,7 @@ public class LikeDbStorage {
                     + " AND EXTRACT(YEAR FROM RELEASE_DATE)=?"
                     + " GROUP BY FILMS.ID,  F.GENRE_ID "
                     + "ORDER BY RATING DESC LIMIT ?";
+            //@formatter:on
             films = jdbcTemplate.query(sql, (rs, rowNum) ->
                     createCurrentFilm(rs), genreId, year, count);
         }
@@ -113,12 +121,14 @@ public class LikeDbStorage {
         if (userService.getUserById(userId) == null)
             throw new NotFoundException("Друг пользователя не найден!");
         List<Film> films;
-        String sql = "SELECT *" + "FROM films AS f "
+        //@formatter:off
+        String sql = "SELECT *"
+                + "FROM films AS f "
                 + "JOIN film_likes AS LIKES_FIRST_USER ON f.id = LIKES_FIRST_USER.film_id "
                 + "JOIN film_likes AS LIKES_SECOND_USER ON LIKES_FIRST_USER.film_id = "
                 + "LIKES_SECOND_USER.film_id "
                 + "WHERE LIKES_FIRST_USER.user_id = ? AND LIKES_SECOND_USER.user_id = ? ";
-
+        //@formatter:on
         films = jdbcTemplate.query(sql, (rs, rowNum) -> createCurrentFilm(rs), userId, friendId);
 
         return films;

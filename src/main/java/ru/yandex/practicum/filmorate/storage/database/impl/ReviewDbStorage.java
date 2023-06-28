@@ -181,9 +181,11 @@ public class ReviewDbStorage {
 
     //Полезность
     public Long countUseful(Long reviewId) {
+        //@formatter:off
         String countUsefulQuery = "SELECT COUNT(CASE WHEN IS_USEFUL = true THEN 1 END) - "
                 + "COUNT(CASE WHEN IS_USEFUL = false THEN 1 END) AS count_useful "
                 + "FROM review_like WHERE review_id = ?";
+        //@formatter:on
         return jdbcTemplate.queryForObject(countUsefulQuery, Long.class, reviewId);
     }
 }
