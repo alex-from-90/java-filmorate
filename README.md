@@ -18,11 +18,13 @@
 
 ## Основан на: 
 
-Java Amazon correctto 11 (11.0.19)
-Spring Boot 2.7
-Dependencies:
-Spring Web WEB
-Build web, including RESTful, applications using Spring MVC. Uses Apache Tomcat as the default embedded container.
+Java Amazon correctto 11 (11.0.19)<br>
+Spring Boot 2.7<br>
+Dependencies:<br>
+Spring Web WEB<br>
+Build web, including RESTful,<br>
+applications using Spring MVC. <br>
+Uses Apache Tomcat as the default embedded container.<br>
 
 ## Командная разработка
 Алексей Ж. ( https://github.com/users/alex-from-90/ ) - Основа проекта, функциональность «Отзывы», team leader<br>
