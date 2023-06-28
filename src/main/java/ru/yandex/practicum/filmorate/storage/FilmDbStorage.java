@@ -15,6 +15,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.model.DirectorSortBy;
 import ru.yandex.practicum.filmorate.storage.model.FilmColumn;
 
 import java.util.*;
@@ -130,32 +131,27 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getDirectorFilms(int directorId, String sortBy) {
-        String sql = "SELECT * FROM films "
-                + "INNER JOIN films_directors ON film_id = id WHERE director_id = ?";
+    public List<Film> getDirectorFilms(int directorId, DirectorSortBy sortBy) {
+        String sql = "SELECT f.*, " +
+                "EXTRACT(YEAR FROM f.release_date) as year_sort, " +
+                "count(fl.USER_ID) as likes_sort " +
+                "FROM films f " +
+                "LEFT JOIN film_likes fl ON fl.film_id = f.id " +
+                "LEFT JOIN films_directors fd ON fd.film_id = f.id WHERE fd.director_id = ? " +
+                "GROUP BY f.ID " +
+                "ORDER BY " + sortBy.name() + "_sort";
 
-        List<FilmColumn> filmColumns = jdbcTemplate.query(sql, new FilmMapper(), directorId);
-        if (filmColumns.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Режиссер с ID=" + directorId + " не найден!");
-        }
-
-        List<Film> directorFilms = filmColumns.stream()
-                .map(this::fromColumnsToDto)
-                .collect(Collectors.toList());
-        switch (sortBy) {
-            case "likes":
-                return directorFilms.stream()
-                        .sorted(Comparator.comparingInt(o -> o.getLikes()
-                                .size()))
-                        .collect(Collectors.toList());
-            case "year":
-                return directorFilms.stream()
-                        .sorted(Comparator.comparingInt(o -> o.getReleaseDate()
-                                .getYear()))
-                        .collect(Collectors.toList());
-            default:
-                return new ArrayList<>();
+        try {
+            List<FilmColumn> filmColumns = jdbcTemplate.query(sql, new FilmMapper(), directorId);
+            if (filmColumns.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Режиссер с ID=" + directorId + " не найден!");
+            }
+            return filmColumns.stream()
+                    .map(this::fromColumnsToDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

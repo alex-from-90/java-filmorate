@@ -6,6 +6,7 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.model.DirectorSortBy;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -74,7 +75,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getDirectorFilms(int directorId, String sortBy) {
+    public List<Film> getDirectorFilms(int directorId, DirectorSortBy sortBy) {
         return null;
     }
 

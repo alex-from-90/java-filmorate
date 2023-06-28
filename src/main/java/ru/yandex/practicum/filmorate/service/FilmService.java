@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.model.DirectorSortBy;
 
 import java.util.List;
 
@@ -50,7 +51,7 @@ public class FilmService {
         return filmStorage.delete(id);
     }
 
-    public List<Film> getDirectorFilms(int directorId, String sortBy) {
+    public List<Film> getDirectorFilms(int directorId, DirectorSortBy sortBy) {
         return filmStorage.getDirectorFilms(directorId, sortBy);
     }
 

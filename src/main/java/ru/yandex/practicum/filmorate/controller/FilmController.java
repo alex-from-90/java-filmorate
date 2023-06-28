@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.model.DirectorSortBy;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -62,7 +63,7 @@ public class FilmController {
     }
 
     @GetMapping("/director/{directorId}")
-    public List<Film> getDirectorFilms(@PathVariable int directorId, @RequestParam String sortBy) {
+    public List<Film> getDirectorFilms(@PathVariable int directorId, @RequestParam DirectorSortBy sortBy) {
         return filmService.getDirectorFilms(directorId, sortBy);
     }
 
