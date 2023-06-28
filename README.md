@@ -28,11 +28,17 @@ Uses Apache Tomcat as the default embedded container.<br>
 
 ## Командная разработка
 Алексей Ж. ( https://github.com/users/alex-from-90/ ) - Основа проекта, функциональность «Отзывы», team leader<br>
+
 Дарина Ф. ( https://github.com/krakaduum/ ) - Функциональность «Фильмы по режиссёрам»<br>
+
 Евгений Б. ( https://github.com/EvgeniyBushuev/ ) - Функциональность «Лента событий»<br>
+
 Андрей Ц. ( https://github.com/DeepDarkFanta/ ) - Функциональность «Поиск»<br>
+
 Никита М. ( https://github.com/nik110996/ ) - Функциональность «Рекомендации»<br>
-Георгий П. ( https://github.com/ImING0/ ) - Функциональность «Удаление фильмов и пользователей», Рефакторинг<br>
+
+Георгий П. ( https://github.com/ImING0/ ) - Функциональность «Удаление фильмов и пользователей», рефакторинг<br>
+
 Евгений К. ( https://github.com/DayZscripter/ ) - Функциональность «Общие фильмы», «Популярные фильмы»<br>
 
 **Особая благодарность:**<br> 
