@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.database.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,9 +15,9 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.model.DirectorSortBy;
-import ru.yandex.practicum.filmorate.storage.model.FilmColumn;
-import ru.yandex.practicum.filmorate.storage.model.FilmSearchParameters;
+import ru.yandex.practicum.filmorate.storage.database.model.DirectorSortBy;
+import ru.yandex.practicum.filmorate.storage.database.model.FilmColumn;
+import ru.yandex.practicum.filmorate.storage.database.model.FilmSearchParameters;
 
 import java.util.*;
 import java.util.stream.Collectors;

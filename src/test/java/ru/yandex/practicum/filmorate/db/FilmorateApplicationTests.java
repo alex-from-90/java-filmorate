@@ -13,8 +13,8 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.database.impl.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.database.impl.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.Arrays;
