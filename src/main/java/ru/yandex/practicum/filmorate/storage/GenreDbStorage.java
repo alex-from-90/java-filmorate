@@ -16,7 +16,7 @@ import java.util.List;
 @Primary
 @Component
 @RequiredArgsConstructor
-public class GenreStorage {
+public class GenreDbStorage {
     private final JdbcTemplate jdbcTemplate;
     GenreMapper genreMapper = new GenreMapper();
 

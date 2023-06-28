@@ -18,7 +18,7 @@ import java.util.List;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class FriendStorage {
+public class FriendDbStorage {
     private final JdbcTemplate jdbcTemplate;
     private final UserStorage userStorage;
 

@@ -14,7 +14,7 @@ import java.util.List;
 @Primary
 @Component
 @RequiredArgsConstructor
-public class MpaStorage {
+public class MpaDbStorage {
     private final JdbcTemplate jdbcTemplate;
 
     public List<Mpa> getAllMpa() {

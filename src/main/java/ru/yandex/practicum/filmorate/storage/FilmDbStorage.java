@@ -29,10 +29,10 @@ import java.util.stream.Collectors;
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final MpaStorage mpaStorage; // Поменяли сервисы на storage
-    private final GenreStorage genreStorage;
-    private final LikeStorage likeStorage;
-    private final DirectorStorage directorStorage;
+    private final MpaDbStorage mpaDbStorage; // Поменяли сервисы на storage
+    private final GenreDbStorage genreDbStorage;
+    private final LikeDbStorage likeDbStorage;
+    private final DirectorDbStorage directorDbStorage;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     public List<Film> getFilms() {
@@ -61,10 +61,10 @@ public class FilmDbStorage implements FilmStorage {
         long generatedId = simpleJdbcInsert.executeAndReturnKey(parameters)
                 .longValue();
         film.setId(generatedId);
-        film.setMpa(mpaStorage.getMpaById(film.getMpa()
+        film.setMpa(mpaDbStorage.getMpaById(film.getMpa()
                 .getId())); //Напрямую, мимо сервисов
-        genreStorage.add(film);
-        directorStorage.addDirectorToFilm(film);
+        genreDbStorage.add(film);
+        directorDbStorage.addDirectorToFilm(film);
 
         return film;
     }
@@ -81,10 +81,10 @@ public class FilmDbStorage implements FilmStorage {
                         .getId(), film.getId());
 
         if (updateCount != 0) {
-            film.setMpa(mpaStorage.getMpaById(film.getMpa()
+            film.setMpa(mpaDbStorage.getMpaById(film.getMpa()
                     .getId()));
-            genreStorage.updateGenres(film); //Напрямую, мимо сервисов
-            directorStorage.addDirectorToFilm(film);
+            genreDbStorage.updateGenres(film); //Напрямую, мимо сервисов
+            directorDbStorage.addDirectorToFilm(film);
 
             return film;
         } else {
@@ -188,10 +188,10 @@ public class FilmDbStorage implements FilmStorage {
         film.setDescription(filmColumn.getDescription());
         film.setDuration(filmColumn.getDuration());
         film.setReleaseDate(filmColumn.getReleaseDate());
-        film.setMpa(mpaStorage.getMpaById(filmColumn.getMpaId()));
-        film.setGenres(new HashSet<>(genreStorage.getFilmGenres(film.getId())));
-        film.setDirectors(new HashSet<>(directorStorage.getFilmDirectors(film.getId())));
-        film.setLikes(new HashSet<>(likeStorage.getLikes(filmColumn.getId())));
+        film.setMpa(mpaDbStorage.getMpaById(filmColumn.getMpaId()));
+        film.setGenres(new HashSet<>(genreDbStorage.getFilmGenres(film.getId())));
+        film.setDirectors(new HashSet<>(directorDbStorage.getFilmDirectors(film.getId())));
+        film.setLikes(new HashSet<>(likeDbStorage.getLikes(filmColumn.getId())));
         return film;
     }
 }

@@ -20,7 +20,7 @@ import java.util.Map;
 @Primary
 @Component
 @RequiredArgsConstructor
-public class DirectorStorage {
+public class DirectorDbStorage {
     private final JdbcTemplate jdbcTemplate;
     private final DirectorMapper directorMapper = new DirectorMapper();
 

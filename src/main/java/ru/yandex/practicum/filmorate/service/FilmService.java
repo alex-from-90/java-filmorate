@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.LikeDbStorage;
 import ru.yandex.practicum.filmorate.storage.model.DirectorSortBy;
 import ru.yandex.practicum.filmorate.storage.model.FilmSearchParameters;
 
@@ -14,22 +14,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmService {
     private final FilmStorage filmStorage;
-    private final LikeStorage likeStorage;
+    private final LikeDbStorage likeDbStorage;
     private final FeedService feedService;
 
     public void addLike(Long filmId, Long userId) {
-        likeStorage.addLike(filmId, userId);
+        likeDbStorage.addLike(filmId, userId);
         feedService.createFeed(userId, filmId, "LIKE", "ADD");
     }
 
     public void deleteLike(Long filmId, Long userId) {
-        likeStorage.deleteLike(filmId, userId);
+        likeDbStorage.deleteLike(filmId, userId);
         feedService.createFeed(userId, filmId, "LIKE", "REMOVE");
     }
 
     public List<Film> getPopular(int count, int genreId, int year) {
 
-        return likeStorage.getPopular(count, genreId, year);
+        return likeDbStorage.getPopular(count, genreId, year);
     }
 
     public List<Film> getFilms() {
@@ -61,6 +61,6 @@ public class FilmService {
     }
 
     public List<Film> getCommonFilms(long userId, long friendId) {
-        return likeStorage.getCommonFilms(userId, friendId);
+        return likeDbStorage.getCommonFilms(userId, friendId);
     }
 }

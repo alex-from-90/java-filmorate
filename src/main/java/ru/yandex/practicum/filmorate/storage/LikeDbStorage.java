@@ -24,12 +24,12 @@ import java.util.*;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class LikeStorage {
+public class LikeDbStorage {
     private final JdbcTemplate jdbcTemplate;
     private final MpaService mpaService;
     private final GenreService genreService;
     private final UserStorage userService;
-    private final DirectorStorage directorStorage;
+    private final DirectorDbStorage directorDbStorage;
 
     public void addLike(Long filmId, Long userId) {
         String sql = "MERGE INTO film_likes (film_id, user_id) VALUES (?, ?)";
@@ -136,7 +136,7 @@ public class LikeStorage {
         film.setMpa(mpaService.getMpaById(rs.getInt("rating_id")));
         film.setGenres(genreService.getFilmGenres(filmId));
         film.setLikes(new HashSet<>(getLikes(filmId)));
-        Collection<Director> directors = directorStorage.getFilmDirectors(filmId);
+        Collection<Director> directors = directorDbStorage.getFilmDirectors(filmId);
         film.getDirectors().addAll(directors);
 
         return film;
