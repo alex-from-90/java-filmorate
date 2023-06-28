@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.storage.ReviewDbStorage;
+import ru.yandex.practicum.filmorate.storage.database.impl.ReviewDbStorage;
 
 import java.util.Collection;
 
@@ -52,8 +52,7 @@ public class ReviewService {
 
     //Получить отзыв по ID
     public Review getReviewById(final Long id) {
-        return reviewStorage.getById(id)
-                .orElse(null);
+        return reviewStorage.getById(id).orElse(null);
     }
 
     //Получить все отзывы

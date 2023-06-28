@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.database.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,18 +18,21 @@ import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 @Primary
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class LikeStorage {
+public class LikeDbStorage {
     private final JdbcTemplate jdbcTemplate;
     private final MpaService mpaService;
     private final GenreService genreService;
     private final UserStorage userService;
-    private final DirectorStorage directorStorage;
+    private final DirectorDbStorage directorDbStorage;
 
     public void addLike(Long filmId, Long userId) {
         String sql = "MERGE INTO film_likes (film_id, user_id) VALUES (?, ?)";
@@ -54,15 +57,18 @@ public class LikeStorage {
         List<Film> films = new ArrayList<>();
         if (genreId == -1 && year == -1) {
             log.info("Фильтрация популярных фильмов без параметров");
+            //@formatter:off
             sql = "SELECT ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID , "
                     + "COUNT(L.USER_ID) as RATING FROM FILMS "
                     + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID "
-                    + "GROUP BY FILMS" + ".ID "
+                    + "GROUP BY FILMS.ID "
                     + "ORDER BY RATING DESC LIMIT ?";
+            //@formatter:on
             films = jdbcTemplate.query(sql, (rs, rowNum) -> createCurrentFilm(rs), count);
         }
         if (genreId > 0 && year == -1) {
             log.info("Фильтрация популярных фильмов по жанрам");
+            //@formatter:off
             sql = "SELECT ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID, "
                     + "COUNT(L.USER_ID) as RATING FROM FILMS "
                     + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID "
@@ -70,20 +76,24 @@ public class LikeStorage {
                     + "WHERE F.GENRE_ID=?"
                     + " GROUP BY FILMS.ID,  F.GENRE_ID "
                     + "ORDER BY RATING DESC LIMIT ?";
+            //@formatter:on
             films = jdbcTemplate.query(sql, (rs, rowNum) -> createCurrentFilm(rs), genreId, count);
         }
         if (genreId == -1 && year > 0) {
             log.info("Фильтрация популярных фильмов по годам");
+            //@formatter:off
             sql = "SELECT ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID , "
                     + "COUNT(L.USER_ID) as RATING FROM FILMS "
                     + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID "
                     + "WHERE EXTRACT(YEAR FROM RELEASE_DATE)=?"
                     + " GROUP BY FILMS.ID"
                     + " ORDER BY RATING DESC LIMIT ?";
+            //@formatter:on
             films = jdbcTemplate.query(sql, (rs, rowNum) -> createCurrentFilm(rs), year, count);
         }
         if (genreId > 0 && year > 0) {
             log.info("Фильтрация популярных фильмов по жанрам и годам");
+            //@formatter:off
             sql = "SELECT ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID , "
                     + "COUNT(L.USER_ID) as RATING FROM FILMS "
                     + "LEFT JOIN FILM_LIKES L on FILMS.ID = L.FILM_ID "
@@ -92,8 +102,9 @@ public class LikeStorage {
                     + " AND EXTRACT(YEAR FROM RELEASE_DATE)=?"
                     + " GROUP BY FILMS.ID,  F.GENRE_ID "
                     + "ORDER BY RATING DESC LIMIT ?";
-            films = jdbcTemplate.query(sql, (rs, rowNum) ->
-                    createCurrentFilm(rs), genreId, year, count);
+            //@formatter:on
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> createCurrentFilm(rs), genreId, year,
+                    count);
         }
         if (genreId < -1 && year < -1) {
             throw new ValidationException(String.format(
@@ -113,12 +124,14 @@ public class LikeStorage {
         if (userService.getUserById(userId) == null)
             throw new NotFoundException("Друг пользователя не найден!");
         List<Film> films;
-        String sql = "SELECT *" + "FROM films AS f "
+        //@formatter:off
+        String sql = "SELECT *"
+                + "FROM films AS f "
                 + "JOIN film_likes AS LIKES_FIRST_USER ON f.id = LIKES_FIRST_USER.film_id "
                 + "JOIN film_likes AS LIKES_SECOND_USER ON LIKES_FIRST_USER.film_id = "
                 + "LIKES_SECOND_USER.film_id "
                 + "WHERE LIKES_FIRST_USER.user_id = ? AND LIKES_SECOND_USER.user_id = ? ";
-
+        //@formatter:on
         films = jdbcTemplate.query(sql, (rs, rowNum) -> createCurrentFilm(rs), userId, friendId);
 
         return films;
@@ -130,13 +143,12 @@ public class LikeStorage {
         film.setId(filmId);
         film.setName(rs.getString("name"));
         film.setDescription(rs.getString("description"));
-        film.setReleaseDate(rs.getDate("release_date")
-                .toLocalDate());
+        film.setReleaseDate(rs.getDate("release_date").toLocalDate());
         film.setDuration(rs.getInt("duration"));
         film.setMpa(mpaService.getMpaById(rs.getInt("rating_id")));
         film.setGenres(genreService.getFilmGenres(filmId));
         film.setLikes(new HashSet<>(getLikes(filmId)));
-        Collection<Director> directors = directorStorage.getFilmDirectors(filmId);
+        Collection<Director> directors = directorDbStorage.getFilmDirectors(filmId);
         film.getDirectors().addAll(directors);
 
         return film;

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.database.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
@@ -16,7 +16,7 @@ import java.util.List;
 @Primary
 @Component
 @RequiredArgsConstructor
-public class GenreStorage {
+public class GenreDbStorage {
     private final JdbcTemplate jdbcTemplate;
     GenreMapper genreMapper = new GenreMapper();
 

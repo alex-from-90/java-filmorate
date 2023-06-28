@@ -13,7 +13,6 @@ public class ValidationExceptionHandler {
     @ExceptionHandler(ValidationException.class)
     @ResponseBody
     public ResponseEntity<String> handleValidationException(ValidationException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 }

@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.model.DirectorSortBy;
-import ru.yandex.practicum.filmorate.storage.model.FilmSearchParameters;
+import ru.yandex.practicum.filmorate.storage.database.model.DirectorSortBy;
+import ru.yandex.practicum.filmorate.storage.database.model.FilmSearchParameters;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -64,21 +64,22 @@ public class FilmController {
     }
 
     @GetMapping("/director/{directorId}")
-    public List<Film> getDirectorFilms(@PathVariable int directorId, @RequestParam DirectorSortBy sortBy) {
+    public List<Film> getDirectorFilms(@PathVariable int directorId,
+            @RequestParam DirectorSortBy sortBy) {
         return filmService.getDirectorFilms(directorId, sortBy);
     }
 
     @GetMapping("/search")
     public List<Film> filmsSearch(@RequestParam String query,
-                                  @RequestParam List<FilmSearchParameters> by) {
+            @RequestParam List<FilmSearchParameters> by) {
         log.info("Получен GET-запрос к эндпоинту: '/films' на поиск по: " + query + " " + by);
         return filmService.filmSearch(query, by);
     }
 
     @GetMapping("/popular")
     public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count,
-                                      @RequestParam(defaultValue = "-1") Integer genreId,
-                                      @RequestParam(defaultValue = "-1") Integer year) {
+            @RequestParam(defaultValue = "-1") Integer genreId,
+            @RequestParam(defaultValue = "-1") Integer year) {
         log.info("Запрос лучших фильмов, count = {}, genreId = {}, year = {}", count, genreId,
                 year);
         return filmService.getPopular(count, genreId, year);

@@ -91,8 +91,7 @@ public class UserControllerTest {
 
     @Test
     public void testFutureBirthday() {
-        user.setBirthday(LocalDate.parse(String.valueOf(LocalDate.now()
-                .plusDays(1))));
+        user.setBirthday(LocalDate.parse(String.valueOf(LocalDate.now().plusDays(1))));
         violations = validator.validate(user);
         assertEquals(1, violations.size(), "Ошибки валидации");
     }

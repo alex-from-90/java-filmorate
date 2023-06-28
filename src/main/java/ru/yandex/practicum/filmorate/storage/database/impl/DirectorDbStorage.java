@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.database.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
@@ -20,7 +20,7 @@ import java.util.Map;
 @Primary
 @Component
 @RequiredArgsConstructor
-public class DirectorStorage {
+public class DirectorDbStorage {
     private final JdbcTemplate jdbcTemplate;
     private final DirectorMapper directorMapper = new DirectorMapper();
 
@@ -46,19 +46,15 @@ public class DirectorStorage {
     }
 
     public Director createDirector(Director director) {
-        if (director.getName()
-                .isBlank() || director.getName()
-                .isEmpty()) {
+        if (director.getName().isBlank() || director.getName().isEmpty()) {
             throw new ValidationException("Имя не может быть пустым");
         }
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName(
-                        "directors")
-                .usingGeneratedKeyColumns("id");
+                "directors").usingGeneratedKeyColumns("id");
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", director.getName());
-        int generatedId = simpleJdbcInsert.executeAndReturnKey(parameters)
-                .intValue();
+        int generatedId = simpleJdbcInsert.executeAndReturnKey(parameters).intValue();
         director.setId(generatedId);
 
         return director;

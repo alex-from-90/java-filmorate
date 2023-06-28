@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.database.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,18 +29,15 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User createUser(User user) {
-        if (user.getName() == null || user.getName()
-                .isEmpty()) {
+        if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
 
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName(
-                        "users")
-                .usingGeneratedKeyColumns("id");
+                "users").usingGeneratedKeyColumns("id");
 
         SqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
-        user.setId(simpleJdbcInsert.executeAndReturnKey(parameterSource)
-                .longValue());
+        user.setId(simpleJdbcInsert.executeAndReturnKey(parameterSource).longValue());
 
         log.info("Добавлен новый пользователь с ID={}", user.getId());
         return user;
@@ -50,7 +47,8 @@ public class UserDbStorage implements UserStorage {
     public User updateUser(User user) {
         if (getUserById(user.getId()) != null) {
             //@formatter:off
-            String sqlQuery = "UPDATE users SET " + "email = ?, login = ?, name = ?, birthday = ? "
+            String sqlQuery = "UPDATE users SET "
+                    + "email = ?, login = ?, name = ?, birthday = ? "
                     + "WHERE id = ?";
             //@formatter:on
             jdbcTemplate.update(sqlQuery, user.getEmail(), user.getLogin(), user.getName(),

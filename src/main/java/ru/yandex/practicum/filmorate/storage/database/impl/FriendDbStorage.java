@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.database.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import java.util.List;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class FriendStorage {
+public class FriendDbStorage {
     private final JdbcTemplate jdbcTemplate;
     private final UserStorage userStorage;
 
@@ -53,10 +53,13 @@ public class FriendStorage {
     }
 
     public List<User> getCommonFriends(Long firstUserId, Long secondUserId) {
-        String sql = "SELECT u.id, u.email, u.login, u.name, u.birthday " + "FROM friends f1 "
+        //@formatter:off
+        String sql = "SELECT u.id, u.email, u.login, u.name, u.birthday "
+                + "FROM friends f1 "
                 + "JOIN friends f2 ON f1.friend_id = f2.friend_id "
                 + "JOIN users u ON f1.friend_id = u.id "
                 + "WHERE f1.user_id = ? AND f2.user_id = ?";
+        //@formatter:on
         UserMapper userMapper = new UserMapper();
         return jdbcTemplate.query(sql, ps -> {
             ps.setLong(1, firstUserId);

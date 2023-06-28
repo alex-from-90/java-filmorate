@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.database.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
@@ -69,11 +69,9 @@ public class ReviewDbStorage {
         }
 
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName(
-                        "REVIEWS")
-                .usingGeneratedKeyColumns("review_id");
+                "REVIEWS").usingGeneratedKeyColumns("review_id");
         BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(review);
-        review.setReviewId(simpleJdbcInsert.executeAndReturnKey(parameterSource)
-                .longValue());
+        review.setReviewId(simpleJdbcInsert.executeAndReturnKey(parameterSource).longValue());
 
         return review;
     }
@@ -181,9 +179,11 @@ public class ReviewDbStorage {
 
     //Полезность
     public Long countUseful(Long reviewId) {
+        //@formatter:off
         String countUsefulQuery = "SELECT COUNT(CASE WHEN IS_USEFUL = true THEN 1 END) - "
                 + "COUNT(CASE WHEN IS_USEFUL = false THEN 1 END) AS count_useful "
                 + "FROM review_like WHERE review_id = ?";
+        //@formatter:on
         return jdbcTemplate.queryForObject(countUsefulQuery, Long.class, reviewId);
     }
 }

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.database.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,10 +20,11 @@ public class FeedDbStorage implements FeedStorage {
     private final JdbcTemplate jdbcTemplate;
 
     public List<Feed> getFeedByUserId(long id) {
-
+        //@formatter:off
         String sql = "SELECT event_id, timestamp, user_id, event_type, operation, entity_id FROM "
-                + "feeds " + "WHERE user_id = ?";
-
+                + "feeds "
+                + "WHERE user_id = ?";
+        //@formatter:on
         return jdbcTemplate.query(sql, new FeedMapper(), id);
     }
 
