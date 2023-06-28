@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.model.DirectorSortBy;
+import ru.yandex.practicum.filmorate.storage.model.FilmSearchParameters;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -80,7 +81,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> filmsSearch(String query, String by) {
+    public List<Film> filmsSearch(String query, List<FilmSearchParameters> by) {
         return null;
     }
 }
