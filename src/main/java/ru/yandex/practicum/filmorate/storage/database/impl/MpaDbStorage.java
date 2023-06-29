@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.database.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
@@ -14,28 +14,25 @@ import java.util.List;
 @Primary
 @Component
 @RequiredArgsConstructor
-public class MpaStorage {
+public class MpaDbStorage {
     private final JdbcTemplate jdbcTemplate;
 
     public List<Mpa> getAllMpa() {
         String sql = "SELECT * FROM ratings_mpa ORDER BY id";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new Mpa(
-                rs.getInt("id"),
-                rs.getString("name"))
-        );
+        return jdbcTemplate.query(sql,
+                (rs, rowNum) -> new Mpa(rs.getInt("id"), rs.getString("name")));
     }
 
     public Mpa getMpaById(Integer mpaId) {
 
         Mpa mpa;
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("SELECT * FROM ratings_mpa WHERE id = ?", mpaId);
+        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("SELECT * FROM ratings_mpa WHERE id = ?",
+                mpaId);
         if (mpaRows.first()) {
-            mpa = new Mpa(
-                    mpaRows.getInt("id"),
-                    mpaRows.getString("name")
-            );
+            mpa = new Mpa(mpaRows.getInt("id"), mpaRows.getString("name"));
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Рейтинг с ID=" + mpaId + " не найден!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Рейтинг с ID=" + mpaId + " не найден!");
         }
         return mpa;
     }

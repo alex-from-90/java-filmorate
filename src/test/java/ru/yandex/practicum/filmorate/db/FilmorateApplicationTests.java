@@ -13,8 +13,8 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.database.impl.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.database.impl.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -68,8 +67,8 @@ class FilmorateApplicationTests {
         firstFilm.setDuration(114);
         firstFilm.setMpa(new Mpa(1, "G"));
         firstFilm.setLikes(new HashSet<>());
-        firstFilm.setGenres(new HashSet<>(Arrays.asList(new Genre(2, "Драма"),
-                new Genre(1, "Комедия"))));
+        firstFilm.setGenres(
+                new HashSet<>(Arrays.asList(new Genre(2, "Драма"), new Genre(1, "Комедия"))));
 
         secondFilm = new Film();
         secondFilm.setName("Фильм 2");
@@ -95,15 +94,10 @@ class FilmorateApplicationTests {
         User createdUser = userStorage.createUser(firstUser);
         User retrievedUser = userStorage.getUserById(createdUser.getId());
 
-        assertThat(retrievedUser)
-                .extracting(User::getId, User::getName, User::getLogin, User::getEmail, User::getBirthday)
-                .containsExactly(
-                        createdUser.getId(),
-                        createdUser.getName(),
-                        createdUser.getLogin(),
-                        createdUser.getEmail(),
-                        createdUser.getBirthday()
-                );
+        assertThat(retrievedUser).extracting(User::getId, User::getName, User::getLogin,
+                        User::getEmail, User::getBirthday)
+                .containsExactly(createdUser.getId(), createdUser.getName(), createdUser.getLogin(),
+                        createdUser.getEmail(), createdUser.getBirthday());
     }
 
     @Test
@@ -119,15 +113,13 @@ class FilmorateApplicationTests {
 
         User updatedUser = userStorage.updateUser(updateUser);
 
-        assertThat(updatedUser)
-                .extracting(User::getName)
-                .isEqualTo("UpdateUser1");
+        assertThat(updatedUser).extracting(User::getName).isEqualTo("UpdateUser1");
     }
 
     @Test
     public void testDeleteUser() {
         User createdUser = userStorage.createUser(firstUser);
-        userStorage.delete(createdUser.getId());
+        userStorage.deleteUserById(createdUser.getId());
         List<User> listUsers = userStorage.getAllUsers();
         assertThat(listUsers).hasSize(0);
     }
@@ -138,8 +130,7 @@ class FilmorateApplicationTests {
 
         Film retrievedFilm = filmStorage.getFilmById(createdFilm.getId());
 
-        assertThat(retrievedFilm)
-                .extracting(Film::getId, Film::getName)
+        assertThat(retrievedFilm).extracting(Film::getId, Film::getName)
                 .containsExactly(createdFilm.getId(), "Фильм 1");
     }
 
@@ -151,8 +142,8 @@ class FilmorateApplicationTests {
 
         List<Film> listFilms = filmStorage.getFilms();
 
-        assertThat(listFilms)
-                .containsExactlyInAnyOrder(createdFirstFilm, createdSecondFilm, createdThirdFilm);
+        assertThat(listFilms).containsExactlyInAnyOrder(createdFirstFilm, createdSecondFilm,
+                createdThirdFilm);
     }
 
     @Test
@@ -169,8 +160,7 @@ class FilmorateApplicationTests {
 
         Film updatedFilm = filmStorage.update(updateFilm);
 
-        assertThat(updatedFilm)
-                .hasFieldOrPropertyWithValue("name", "UpdateName")
+        assertThat(updatedFilm).hasFieldOrPropertyWithValue("name", "UpdateName")
                 .hasFieldOrPropertyWithValue("description", "UpdateDescription");
     }
 
@@ -190,9 +180,7 @@ class FilmorateApplicationTests {
         filmService.addLike(createdFilm.getId(), createdUser.getId());
 
         Film updatedFilm = filmStorage.getFilmById(createdFilm.getId());
-        assertThat(updatedFilm.getLikes())
-                .hasSize(1)
-                .contains(createdUser.getId());
+        assertThat(updatedFilm.getLikes()).hasSize(1).contains(createdUser.getId());
     }
 
     @Test
@@ -206,9 +194,7 @@ class FilmorateApplicationTests {
         filmService.deleteLike(createdFilm.getId(), createdFirstUser.getId());
 
         Film updatedFilm = filmStorage.getFilmById(createdFilm.getId());
-        assertThat(updatedFilm.getLikes())
-                .hasSize(1)
-                .contains(createdSecondUser.getId());
+        assertThat(updatedFilm.getLikes()).hasSize(1).contains(createdSecondUser.getId());
     }
 
     @Test
@@ -229,11 +215,9 @@ class FilmorateApplicationTests {
         filmService.addLike(createdThirdFilm.getId(), createdFirstUser.getId());
         filmService.addLike(createdThirdFilm.getId(), createdSecondUser.getId());
 
-        List<Film> listFilms = filmService.getPopular(5);
+        List<Film> listFilms = filmService.getPopular(5, -1, -1);
 
-        assertThat(listFilms)
-                .hasSize(3)
-                .extracting(Film::getName)
+        assertThat(listFilms).hasSize(3).extracting(Film::getName)
                 .containsExactly("Фильм 2", "Фильм 3", "Фильм 1");
     }
 
@@ -246,8 +230,7 @@ class FilmorateApplicationTests {
 
         List<User> friends = userService.getFriends(createdFirstUser.getId());
 
-        assertThat(friends)
-                .hasSize(1)
+        assertThat(friends).hasSize(1)
                 .anyMatch(user -> user.getId().equals(createdSecondUser.getId()));
     }
 
@@ -264,11 +247,9 @@ class FilmorateApplicationTests {
 
         List<User> friends = userService.getFriends(createdFirstUser.getId());
 
-        assertThat(friends)
-                .hasSize(1)
+        assertThat(friends).hasSize(1)
                 .anyMatch(user -> user.getId().equals(createdThirdUser.getId()));
     }
-
 
     @Test
     public void testGetFriends() {
@@ -281,8 +262,7 @@ class FilmorateApplicationTests {
 
         List<User> friends = userService.getFriends(createdFirstUser.getId());
 
-        assertThat(friends)
-                .hasSize(2)
+        assertThat(friends).hasSize(2)
                 .anyMatch(user -> user.getId().equals(createdSecondUser.getId()))
                 .anyMatch(user -> user.getId().equals(createdThirdUser.getId()));
     }
@@ -298,10 +278,11 @@ class FilmorateApplicationTests {
         userService.addFriend(createdSecondUser.getId(), createdFirstUser.getId());
         userService.addFriend(createdSecondUser.getId(), createdThirdUser.getId());
 
-        List<User> commonFriends = userService.getCommonFriends(createdFirstUser.getId(), createdSecondUser.getId());
+        List<User> commonFriends = userService.getCommonFriends(createdFirstUser.getId(),
+                createdSecondUser.getId());
 
-        assertThat(commonFriends)
-                .hasSize(1)
-                .satisfies(userList -> assertThat(userList.get(0).getId()).isEqualTo(createdThirdUser.getId()));
+        assertThat(commonFriends).hasSize(1).satisfies(
+                userList -> assertThat(userList.get(0).getId()).isEqualTo(
+                        createdThirdUser.getId()));
     }
 }

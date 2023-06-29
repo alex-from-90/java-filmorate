@@ -17,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UserControllerTest {
-    private User user;
     private static Validator validator;
+    private User user;
     private Set<ConstraintViolation<User>> violations;
 
     @BeforeEach

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.database.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
@@ -16,7 +16,7 @@ import java.util.List;
 @Primary
 @Component
 @RequiredArgsConstructor
-public class GenreStorage {
+public class GenreDbStorage {
     private final JdbcTemplate jdbcTemplate;
     GenreMapper genreMapper = new GenreMapper();
 
@@ -27,18 +27,16 @@ public class GenreStorage {
 
     public Genre getGenreById(Integer genreId) {
         Genre genre;
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("SELECT * FROM genres WHERE id = ?", genreId);
+        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("SELECT * FROM genres WHERE id = ?",
+                genreId);
         if (genreRows.first()) {
-            genre = new Genre(
-                    genreRows.getInt("id"),
-                    genreRows.getString("name")
-            );
+            genre = new Genre(genreRows.getInt("id"), genreRows.getString("name"));
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Жанр с ID=" + genreId + " не найден!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Жанр с ID=" + genreId + " не найден!");
         }
         return genre;
     }
-
 
     public void delete(Film film) {
         jdbcTemplate.update("DELETE FROM film_genres WHERE film_id = ?", film.getId());
@@ -54,11 +52,10 @@ public class GenreStorage {
     }
 
     public List<Genre> getFilmGenres(Long filmId) {
-        String sql = "SELECT * FROM film_genres" +
-                " INNER JOIN genres ON genre_id = id WHERE film_id = ?";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new Genre(
-                rs.getInt("genre_id"), rs.getString("name")), filmId
-        );
+        String sql = "SELECT * FROM film_genres"
+                + " INNER JOIN genres ON genre_id = id WHERE film_id = ?";
+        return jdbcTemplate.query(sql,
+                (rs, rowNum) -> new Genre(rs.getInt("genre_id"), rs.getString("name")), filmId);
     }
 
     public void updateGenres(Film film) {
@@ -72,5 +69,4 @@ public class GenreStorage {
             jdbcTemplate.update(insertGenresQuery, film.getId(), genre.getId());
         }
     }
-
 }

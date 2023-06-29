@@ -3,8 +3,10 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.database.impl.LikeDbStorage;
+import ru.yandex.practicum.filmorate.storage.database.model.DirectorSortBy;
+import ru.yandex.practicum.filmorate.storage.database.model.FilmSearchParameters;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.LikeStorage;
 
 import java.util.List;
 
@@ -12,19 +14,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmService {
     private final FilmStorage filmStorage;
-    private final LikeStorage likeStorage;
-
+    private final LikeDbStorage likeDbStorage;
+    private final FeedService feedService;
 
     public void addLike(Long filmId, Long userId) {
-        likeStorage.addLike(filmId, userId);
+        likeDbStorage.addLike(filmId, userId);
+        feedService.createFeed(userId, filmId, "LIKE", "ADD");
     }
 
     public void deleteLike(Long filmId, Long userId) {
-        likeStorage.deleteLike(filmId, userId);
+        likeDbStorage.deleteLike(filmId, userId);
+        feedService.createFeed(userId, filmId, "LIKE", "REMOVE");
     }
 
-    public List<Film> getPopular(Integer count) {
-        return likeStorage.getPopular(count);
+    public List<Film> getPopular(int count, int genreId, int year) {
+
+        return likeDbStorage.getPopular(count, genreId, year);
     }
 
     public List<Film> getFilms() {
@@ -45,5 +50,17 @@ public class FilmService {
 
     public Film delete(Long id) {
         return filmStorage.delete(id);
+    }
+
+    public List<Film> getDirectorFilms(int directorId, DirectorSortBy sortBy) {
+        return filmStorage.getDirectorFilms(directorId, sortBy);
+    }
+
+    public List<Film> filmSearch(String query, List<FilmSearchParameters> by) {
+        return filmStorage.filmsSearch(query, by);
+    }
+
+    public List<Film> getCommonFilms(long userId, long friendId) {
+        return likeDbStorage.getCommonFilms(userId, friendId);
     }
 }
